@@ -1,44 +1,9 @@
 import React from 'react';
 import ProfileCard from '../components/ProfileCard';
-import PricingSection from '../components/pricing/PricingSection';
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const { toast } = useToast();
-
-  const handleSubscribe = async (tier: 'standard' | 'priority') => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to subscribe",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { tier }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process subscription. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   // Sample data for profile cards
   const profiles = [
     {
@@ -73,7 +38,6 @@ const Index = () => {
 
   return (
     <div className="container mx-auto px-4">
-      {/* Profiles Grid Section */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-center mb-8 neon-text">Discover New Connections</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -88,10 +52,12 @@ const Index = () => {
             />
           ))}
         </div>
+        <div className="text-center mt-12">
+          <Link to="/membership">
+            <Button className="neon-text">View Membership Plans</Button>
+          </Link>
+        </div>
       </section>
-
-      {/* Pricing Section */}
-      <PricingSection onSubscribe={handleSubscribe} />
     </div>
   );
 };
