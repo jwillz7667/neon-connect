@@ -5,6 +5,17 @@
   text-align: center;
 }
 
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.neon-text {
+  color: #D946EF;
+  text-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
