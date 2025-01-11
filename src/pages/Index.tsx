@@ -38,7 +38,7 @@ const Index = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen pt-24 pb-96 p-6 md:p-8">
+      <div className="min-h-screen pt-32 pb-96 p-6 md:p-8">
         <header className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold neon-text text-center mb-4">
             Find Your Connection
