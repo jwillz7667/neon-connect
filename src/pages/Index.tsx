@@ -22,7 +22,7 @@ const Index = () => {
         query = query.eq('state', selectedState);
       }
       
-      const { data, error } = await query;
+      const { data, error } = await query.limit(20);
       
       if (error) {
         console.error('Error fetching profiles:', error);
@@ -51,7 +51,7 @@ const Index = () => {
                 <ProfileCard
                   key={profile.id}
                   name={profile.full_name || 'Anonymous'}
-                  age={28} // You might want to calculate this from a birthdate field
+                  age={28}
                   location={`${profile.city || ''}, ${profile.state || ''}`}
                   imageUrl={profile.avatar_url || '/placeholder.svg'}
                   distance="2 miles"
