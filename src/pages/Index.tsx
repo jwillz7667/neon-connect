@@ -36,10 +36,10 @@ const profiles = [
 
 const Index = () => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="min-h-screen pt-32 pb-96 p-6 md:p-8">
-        <header className="mb-8">
+      <main className="flex-grow mt-20 px-6 md:px-8">
+        <header className="mb-8 pt-8">
           <h1 className="text-4xl md:text-5xl font-bold neon-text text-center mb-4">
             Find Your Connection
           </h1>
@@ -48,16 +48,16 @@ const Index = () => {
           </p>
         </header>
         
-        <main className="container mx-auto">
+        <div className="container mx-auto mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {profiles.map((profile, index) => (
               <ProfileCard key={index} {...profile} />
             ))}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 };
 
