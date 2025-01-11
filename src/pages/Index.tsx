@@ -1,5 +1,7 @@
 import React from 'react';
 import ProfileCard from '../components/ProfileCard';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const profiles = [
   {
@@ -34,24 +36,28 @@ const profiles = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen p-6 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold neon-text text-center mb-4">
-          Find Your Connection
-        </h1>
-        <p className="text-center text-gray-400 max-w-2xl mx-auto">
-          Discover meaningful relationships in your area with our modern approach to dating
-        </p>
-      </header>
-      
-      <main className="container mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {profiles.map((profile, index) => (
-            <ProfileCard key={index} {...profile} />
-          ))}
-        </div>
-      </main>
-    </div>
+    <>
+      <Header />
+      <div className="min-h-screen pt-24 pb-96 p-6 md:p-8">
+        <header className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold neon-text text-center mb-4">
+            Find Your Connection
+          </h1>
+          <p className="text-center text-gray-400 max-w-2xl mx-auto">
+            Discover meaningful relationships in your area with our modern approach to dating
+          </p>
+        </header>
+        
+        <main className="container mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {profiles.map((profile, index) => (
+              <ProfileCard key={index} {...profile} />
+            ))}
+          </div>
+        </main>
+      </div>
+      <Footer />
+    </>
   );
 };
 
