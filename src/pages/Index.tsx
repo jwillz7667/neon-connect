@@ -16,7 +16,7 @@ const Index = () => {
       console.log('Fetching profiles for state:', selectedState);
       let query = supabase
         .from('profiles')
-        .select('*');
+        .select('id, full_name, city, state, avatar_url');
       
       if (selectedState !== 'all') {
         query = query.eq('state', selectedState);
