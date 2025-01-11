@@ -10,29 +10,45 @@ import { useQuery } from '@tanstack/react-query';
 const Index = () => {
   const [selectedState, setSelectedState] = useState('all');
 
-  const { data: profiles = [], isLoading } = useQuery({
+  const { data: profiles = [], isLoading, error } = useQuery({
     queryKey: ['profiles', selectedState],
     queryFn: async () => {
-      console.log('Fetching profiles for state:', selectedState);
-      let query = supabase
-        .from('profiles')
-        .select('id, full_name, city, state, avatar_url');
-      
-      if (selectedState !== 'all') {
-        query = query.eq('state', selectedState);
+      try {
+        console.log('Fetching profiles for state:', selectedState);
+        let query = supabase
+          .from('profiles')
+          .select('id, full_name, city, state, avatar_url');
+        
+        if (selectedState !== 'all') {
+          query = query.eq('state', selectedState);
+        }
+        
+        const { data, error } = await query.limit(20);
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+        
+        if (!data) {
+          console.log('No profiles found');
+          return [];
+        }
+        
+        console.log('Successfully fetched profiles:', data);
+        return data;
+      } catch (err) {
+        console.error('Error in query function:', err);
+        throw err;
       }
-      
-      const { data, error } = await query.limit(20);
-      
-      if (error) {
-        console.error('Error fetching profiles:', error);
-        throw error;
-      }
-      
-      console.log('Fetched profiles:', data);
-      return data || [];
     },
+    retry: 1,
+    staleTime: 30000, // Cache data for 30 seconds
   });
+
+  if (error) {
+    console.error('Query error:', error);
+  }
 
   return (
     <div className="container mx-auto px-4">
@@ -46,18 +62,24 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="all">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {profiles.map((profile) => (
-                <ProfileCard
-                  key={profile.id}
-                  name={profile.full_name || 'Anonymous'}
-                  age={28}
-                  location={`${profile.city || ''}, ${profile.state || ''}`}
-                  imageUrl={profile.avatar_url || '/placeholder.svg'}
-                  distance="2 miles"
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="text-center">Loading profiles...</div>
+            ) : error ? (
+              <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {profiles.map((profile) => (
+                  <ProfileCard
+                    key={profile.id}
+                    name={profile.full_name || 'Anonymous'}
+                    age={28}
+                    location={`${profile.city || ''}, ${profile.state || ''}`}
+                    imageUrl={profile.avatar_url || '/placeholder.svg'}
+                    distance="2 miles"
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="location">
@@ -67,6 +89,8 @@ const Index = () => {
             />
             {isLoading ? (
               <div className="text-center">Loading profiles...</div>
+            ) : error ? (
+              <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {profiles.map((profile) => (
