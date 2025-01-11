@@ -51,10 +51,10 @@ const Index = () => {
           </h1>
           
           <div className="grid md:grid-cols-2 gap-8 mt-8">
-            <Card className="p-6">
+            <Card className="p-6 flex flex-col">
               <h2 className="text-2xl font-semibold mb-4">Standard Membership</h2>
               <p className="text-3xl font-bold mb-4">$100<span className="text-lg font-normal">/week</span></p>
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-3 mb-6 flex-grow">
                 <li className="flex items-center">
                   <span className="mr-2">✓</span>
                   Verified Profile
@@ -69,17 +69,17 @@ const Index = () => {
                 </li>
               </ul>
               <Button 
-                className="w-full"
+                className="w-full mt-auto"
                 onClick={() => handleSubscribe('standard')}
               >
                 Subscribe Now
               </Button>
             </Card>
 
-            <Card className="p-6 border-2 border-primary">
+            <Card className="p-6 border-2 border-primary flex flex-col">
               <h2 className="text-2xl font-semibold mb-4">Priority Membership</h2>
               <p className="text-3xl font-bold mb-4">$200<span className="text-lg font-normal">/week</span></p>
-              <ul className="space-y-3 mb-6">
+              <ul className="space-y-3 mb-6 flex-grow">
                 <li className="flex items-center">
                   <span className="mr-2">✓</span>
                   All Standard Features
@@ -98,7 +98,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button 
-                className="w-full"
+                className="w-full mt-auto"
                 onClick={() => handleSubscribe('priority')}
               >
                 Subscribe Now
