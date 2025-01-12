@@ -6,6 +6,9 @@ import LocationSelector from '../components/LocationSelector';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const Index = () => {
   const [selectedState, setSelectedState] = useState('all');
@@ -36,7 +39,7 @@ const Index = () => {
         }
         
         console.log('Successfully fetched profiles:', data);
-        return data;
+        return data as Profile[];
       } catch (err) {
         console.error('Error in query function:', err);
         throw err;

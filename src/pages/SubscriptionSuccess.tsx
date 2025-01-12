@@ -17,7 +17,7 @@ const SubscriptionSuccess = () => {
         
         if (!user) throw new Error('No user found');
 
-        // Simulate successful subscription
+        // Update subscription in the new subscriptions table
         const { error } = await supabase
           .from('subscriptions')
           .upsert({
