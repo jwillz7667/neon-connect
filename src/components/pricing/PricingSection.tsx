@@ -19,6 +19,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSubscribe }) => {
     { text: 'Featured Profile Status' },
   ];
 
+  const handleSubscribe = (tier: 'standard' | 'priority') => {
+    console.log('PricingSection: handleSubscribe called with tier:', tier);
+    onSubscribe(tier);
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold text-center mb-8">
@@ -31,7 +36,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSubscribe }) => {
           price={100}
           features={standardFeatures}
           tier="standard"
-          onSubscribe={onSubscribe}
+          onSubscribe={handleSubscribe}
         />
         
         <MembershipCard
@@ -40,7 +45,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSubscribe }) => {
           features={priorityFeatures}
           tier="priority"
           isPriority
-          onSubscribe={onSubscribe}
+          onSubscribe={handleSubscribe}
         />
       </div>
     </div>

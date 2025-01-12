@@ -10,6 +10,8 @@ const MembershipPage = () => {
 
   const handleSubscribe = async (tier: 'standard' | 'priority') => {
     try {
+      console.log('MembershipPage: handleSubscribe called with tier:', tier);
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -20,6 +22,8 @@ const MembershipPage = () => {
         });
         return;
       }
+
+      console.log('User is authenticated, creating subscription...');
 
       // For development: directly update subscription status
       const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -36,6 +40,8 @@ const MembershipPage = () => {
         console.error('Subscription error:', subscriptionError);
         throw subscriptionError;
       }
+
+      console.log('Subscription created successfully');
 
       toast({
         title: "Subscription activated",

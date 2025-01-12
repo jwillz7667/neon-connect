@@ -23,6 +23,11 @@ const MembershipCard: React.FC<MembershipCardProps> = ({
   isPriority = false,
   onSubscribe,
 }) => {
+  const handleClick = () => {
+    console.log('MembershipCard: handleClick called for tier:', tier);
+    onSubscribe(tier);
+  };
+
   return (
     <Card className={`p-6 flex flex-col ${isPriority ? 'border-2 border-primary' : ''}`}>
       <h2 className="text-2xl font-semibold mb-4">{title}</h2>
@@ -37,7 +42,7 @@ const MembershipCard: React.FC<MembershipCardProps> = ({
       </ul>
       <Button 
         className="w-full mt-auto"
-        onClick={() => onSubscribe(tier)}
+        onClick={handleClick}
       >
         Subscribe Now
       </Button>
