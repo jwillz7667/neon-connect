@@ -33,11 +33,6 @@ const Index = () => {
           throw error;
         }
         
-        if (!data) {
-          console.log('No profiles found');
-          return [];
-        }
-        
         console.log('Successfully fetched profiles:', data);
         return data as Profile[];
       } catch (err) {
@@ -46,36 +41,19 @@ const Index = () => {
       }
     },
     retry: 1,
-    staleTime: 30000, // Cache data for 30 seconds
+    staleTime: 30000,
   });
-
-  if (error) {
-    console.error('Query error:', error);
-  }
-
-  // Add some sample profiles if none exist
-  const sampleProfiles = profiles.length > 0 ? profiles : [
-    {
-      id: '1',
-      full_name: 'Sarah Johnson',
-      city: 'San Francisco',
-      state: 'CA',
-      avatar_url: 'https://images.unsplash.com/photo-1494891848038-7bd202a2afeb',
-    },
-    {
-      id: '2',
-      full_name: 'Michael Chen',
-      city: 'New York',
-      state: 'NY',
-      avatar_url: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952',
-    },
-    // Add more sample profiles as needed
-  ];
 
   return (
     <div className="container mx-auto px-4">
       <section className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8 neon-text">Discover New Connections</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-4 neon-text">Discover Amazing Profiles</h2>
+          <p className="text-gray-300 mb-6">Browse our curated selection of profiles</p>
+          <Link to="/membership">
+            <Button className="neon-text">Become a Provider</Button>
+          </Link>
+        </div>
         
         <Tabs defaultValue="all" className="mb-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
@@ -90,7 +68,7 @@ const Index = () => {
               <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {sampleProfiles.map((profile) => (
+                {profiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
                     name={profile.full_name || 'Anonymous'}
@@ -98,6 +76,7 @@ const Index = () => {
                     location={`${profile.city || ''}, ${profile.state || ''}`}
                     imageUrl={profile.avatar_url || '/placeholder.svg'}
                     distance="2 miles"
+                    username={profile.username}
                   />
                 ))}
               </div>
@@ -115,7 +94,7 @@ const Index = () => {
               <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {sampleProfiles.map((profile) => (
+                {profiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
                     name={profile.full_name || 'Anonymous'}
@@ -123,18 +102,13 @@ const Index = () => {
                     location={`${profile.city || ''}, ${profile.state || ''}`}
                     imageUrl={profile.avatar_url || '/placeholder.svg'}
                     distance="2 miles"
+                    username={profile.username}
                   />
                 ))}
               </div>
             )}
           </TabsContent>
         </Tabs>
-
-        <div className="text-center mt-12">
-          <Link to="/membership">
-            <Button className="neon-text">View Membership Plans</Button>
-          </Link>
-        </div>
       </section>
     </div>
   );

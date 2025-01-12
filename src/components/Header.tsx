@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
-import { User, Search, MessageCircle } from "lucide-react";
+import { Search, Crown } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 const Header = () => {
@@ -23,17 +23,12 @@ const Header = () => {
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link to="/messages" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
-                  <MessageCircle size={20} />
-                  <span className="hidden sm:inline">Messages</span>
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link to="/profile" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
-                  <User size={20} />
-                  <span className="hidden sm:inline">Profile</span>
+                <Link 
+                  to="/membership" 
+                  className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors neon-text"
+                >
+                  <Crown size={20} />
+                  <span className="hidden sm:inline">Become a Provider</span>
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
