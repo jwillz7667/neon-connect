@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PricingSection from '../components/pricing/PricingSection';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const MembershipPage = () => {
@@ -32,7 +32,10 @@ const MembershipPage = () => {
           current_period_end: futureDate.toISOString(),
         });
 
-      if (subscriptionError) throw subscriptionError;
+      if (subscriptionError) {
+        console.error('Subscription error:', subscriptionError);
+        throw subscriptionError;
+      }
 
       toast({
         title: "Subscription activated",
