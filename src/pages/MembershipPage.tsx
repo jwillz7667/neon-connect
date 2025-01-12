@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PricingSection from '../components/pricing/PricingSection';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const MembershipPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubscribe = async (tier: 'standard' | 'priority') => {
     try {
@@ -19,15 +21,26 @@ const MembershipPage = () => {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { tier }
+      // For development: directly update subscription status
+      const { error: subscriptionError } = await supabase
+        .from('subscriptions')
+        .upsert({
+          user_id: session.user.id,
+          tier: tier.toUpperCase(),
+          status: 'active',
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        });
+
+      if (subscriptionError) throw subscriptionError;
+
+      toast({
+        title: "Subscription activated",
+        description: "You can now proceed with verification",
       });
 
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      // Redirect to provider onboarding
+      navigate('/provider-onboarding');
+      
     } catch (error) {
       console.error('Subscription error:', error);
       toast({
