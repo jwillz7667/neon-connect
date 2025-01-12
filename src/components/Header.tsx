@@ -14,23 +14,19 @@ const Header = () => {
         <NavigationMenu>
           <NavigationMenuList className="flex gap-6">
             <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link to="/search" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
-                  <Search size={20} />
-                  <span className="hidden sm:inline">Search</span>
-                </Link>
-              </NavigationMenuLink>
+              <Link to="/search" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
+                <Search size={20} />
+                <span className="hidden sm:inline">Search</span>
+              </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link 
-                  to="/membership" 
-                  className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors neon-text"
-                >
-                  <Crown size={20} />
-                  <span className="hidden sm:inline">Become a Provider</span>
-                </Link>
-              </NavigationMenuLink>
+              <Link 
+                to="/membership" 
+                className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors neon-text"
+              >
+                <Crown size={20} />
+                <span className="hidden sm:inline">Become a Provider</span>
+              </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
