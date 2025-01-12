@@ -8,11 +8,14 @@ interface ProfileCardProps {
   location: string;
   imageUrl: string;
   distance: string;
+  username?: string;
 }
 
-const ProfileCard = ({ name, age, location, imageUrl, distance }: ProfileCardProps) => {
+const ProfileCard = ({ name, age, location, imageUrl, distance, username }: ProfileCardProps) => {
+  const profilePath = username ? `/profile/${encodeURIComponent(username)}` : `/profile/${encodeURIComponent(name.toLowerCase())}`;
+  
   return (
-    <Link to={`/profile/${name.toLowerCase()}`} className="block">
+    <Link to={profilePath} className="block">
       <div className="glass-card rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 group w-full max-w-[200px] mx-auto">
         <div className="relative aspect-[3/4]">
           <img

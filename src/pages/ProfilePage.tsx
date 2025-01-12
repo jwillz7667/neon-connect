@@ -7,6 +7,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface Stats {
   height: string;
@@ -15,37 +17,78 @@ interface Stats {
 }
 
 interface Profile {
-  name: string;
-  age: number;
-  location: string;
-  images: string[];
-  stats: Stats;
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url: string;
   bio: string;
+  location: string;
+  city: string;
+  state: string;
+  created_at: string;
 }
 
-// This would typically come from an API, using static data for demo
-const getProfileData = (id: string): Profile => {
-  return {
-    name: "Alex",
-    age: 28,
-    location: "New York, NY",
-    images: [
-      "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-      "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      "https://images.unsplash.com/photo-1518770660439-4636190af475"
-    ],
-    stats: {
-      height: "5'10\"",
-      bodyType: "Athletic",
-      exercise: "5+ times a week"
-    },
-    bio: "Hey there! I'm passionate about fitness, technology, and exploring new places. Looking for someone who shares my enthusiasm for life and adventure. Let's grab a coffee and see where things go!"
-  };
+const fetchProfile = async (username: string): Promise<Profile> => {
+  console.log('Fetching profile for username:', username);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .ilike('username', username)
+    .single();
+
+  if (error) {
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error('Profile not found');
+  }
+
+  console.log('Fetched profile:', data);
+  return data;
 };
 
 const ProfilePage = () => {
   const { id } = useParams();
-  const profile = getProfileData(id || "");
+  const decodedUsername = id ? decodeURIComponent(id) : '';
+
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: ['profile', decodedUsername],
+    queryFn: () => fetchProfile(decodedUsername),
+    enabled: !!decodedUsername,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-20">
+        <div className="text-center">Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-20">
+        <div className="text-center text-red-500">Error loading profile. Please try again later.</div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-20">
+        <div className="text-center">Profile not found</div>
+      </div>
+    );
+  }
+
+  // Default images if none are provided
+  const images = [
+    "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
+    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    "https://images.unsplash.com/photo-1518770660439-4636190af475"
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8 mt-20">
@@ -53,12 +96,12 @@ const ProfilePage = () => {
       <div className="max-w-2xl mx-auto mb-8">
         <Carousel className="w-full">
           <CarouselContent>
-            {profile.images.map((image, index) => (
+            {images.map((image, index) => (
               <CarouselItem key={index}>
                 <div className="aspect-[3/4] relative">
                   <img
-                    src={image}
-                    alt={`${profile.name} photo ${index + 1}`}
+                    src={profile.avatar_url || image}
+                    alt={`${profile.full_name || profile.username} photo ${index + 1}`}
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
@@ -74,9 +117,13 @@ const ProfilePage = () => {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 neon-text">
-            {profile.name}, {profile.age}
+            {profile.full_name || profile.username}
           </h1>
-          <p className="text-gray-400">{profile.location}</p>
+          <p className="text-gray-400">
+            {profile.city && profile.state 
+              ? `${profile.city}, ${profile.state}`
+              : profile.location || 'Location not specified'}
+          </p>
         </div>
 
         {/* Stats */}
@@ -84,16 +131,18 @@ const ProfilePage = () => {
           <h2 className="text-xl font-semibold mb-4 neon-text">Stats</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-gray-400">Height</p>
-              <p className="font-medium">{profile.stats.height}</p>
+              <p className="text-gray-400">Member Since</p>
+              <p className="font-medium">
+                {new Date(profile.created_at).toLocaleDateString()}
+              </p>
             </div>
             <div>
-              <p className="text-gray-400">Body Type</p>
-              <p className="font-medium">{profile.stats.bodyType}</p>
+              <p className="text-gray-400">Profile Views</p>
+              <p className="font-medium">0</p>
             </div>
             <div>
-              <p className="text-gray-400">Exercise</p>
-              <p className="font-medium">{profile.stats.exercise}</p>
+              <p className="text-gray-400">Status</p>
+              <p className="font-medium">Active</p>
             </div>
           </div>
         </div>
@@ -101,7 +150,9 @@ const ProfilePage = () => {
         {/* Bio */}
         <div className="glass-card p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 neon-text">About Me</h2>
-          <p className="text-gray-300 leading-relaxed">{profile.bio}</p>
+          <p className="text-gray-300 leading-relaxed">
+            {profile.bio || 'No bio provided yet.'}
+          </p>
         </div>
       </div>
     </div>
