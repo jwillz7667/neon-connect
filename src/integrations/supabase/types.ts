@@ -270,10 +270,14 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_verified: boolean | null
           location: string | null
+          provider_since: string | null
           state: string | null
           updated_at: string
           username: string | null
+          verification_documents: Json | null
+          verification_status: string | null
           website: string | null
         }
         Insert: {
@@ -284,10 +288,14 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          is_verified?: boolean | null
           location?: string | null
+          provider_since?: string | null
           state?: string | null
           updated_at?: string
           username?: string | null
+          verification_documents?: Json | null
+          verification_status?: string | null
           website?: string | null
         }
         Update: {
@@ -298,10 +306,14 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_verified?: boolean | null
           location?: string | null
+          provider_since?: string | null
           state?: string | null
           updated_at?: string
           username?: string | null
+          verification_documents?: Json | null
+          verification_status?: string | null
           website?: string | null
         }
         Relationships: []

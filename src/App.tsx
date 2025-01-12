@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import ProfilePage from './pages/ProfilePage';
 import MembershipPage from './pages/MembershipPage';
+import ProviderOnboarding from './pages/ProviderOnboarding';
+import ProfileEdit from './pages/ProfileEdit';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -16,6 +18,8 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/profile/:id" element={<ProfilePage />} />
             <Route path="/membership" element={<MembershipPage />} />
+            <Route path="/provider-onboarding" element={<ProviderOnboarding />} />
+            <Route path="/profile/edit" element={<ProfileEdit />} />
           </Routes>
         </main>
         <Footer />
