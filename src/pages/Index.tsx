@@ -20,7 +20,7 @@ const Index = () => {
         console.log('Fetching profiles for state:', selectedState);
         let query = supabase
           .from('profiles')
-          .select('id, full_name, city, state, avatar_url');
+          .select('*');
         
         if (selectedState !== 'all') {
           query = query.eq('state', selectedState);
@@ -53,12 +53,31 @@ const Index = () => {
     console.error('Query error:', error);
   }
 
+  // Add some sample profiles if none exist
+  const sampleProfiles = profiles.length > 0 ? profiles : [
+    {
+      id: '1',
+      full_name: 'Sarah Johnson',
+      city: 'San Francisco',
+      state: 'CA',
+      avatar_url: 'https://images.unsplash.com/photo-1494891848038-7bd202a2afeb',
+    },
+    {
+      id: '2',
+      full_name: 'Michael Chen',
+      city: 'New York',
+      state: 'NY',
+      avatar_url: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952',
+    },
+    // Add more sample profiles as needed
+  ];
+
   return (
     <div className="container mx-auto px-4">
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-center mb-8 neon-text">Discover New Connections</h2>
         
-        <Tabs defaultValue="location" className="mb-8">
+        <Tabs defaultValue="all" className="mb-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
             <TabsTrigger value="all">All Profiles</TabsTrigger>
             <TabsTrigger value="location">By Location</TabsTrigger>
@@ -71,7 +90,7 @@ const Index = () => {
               <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {profiles.map((profile) => (
+                {sampleProfiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
                     name={profile.full_name || 'Anonymous'}
@@ -96,7 +115,7 @@ const Index = () => {
               <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {profiles.map((profile) => (
+                {sampleProfiles.map((profile) => (
                   <ProfileCard
                     key={profile.id}
                     name={profile.full_name || 'Anonymous'}
