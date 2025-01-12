@@ -22,13 +22,14 @@ const MembershipPage = () => {
       }
 
       // For development: directly update subscription status
+      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const { error: subscriptionError } = await supabase
         .from('subscriptions')
         .upsert({
           user_id: session.user.id,
           tier: tier.toUpperCase(),
           status: 'active',
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+          current_period_end: futureDate.toISOString(),
         });
 
       if (subscriptionError) throw subscriptionError;
