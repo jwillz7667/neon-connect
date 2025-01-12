@@ -10,12 +10,6 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
-interface Stats {
-  height: string;
-  bodyType: string;
-  exercise: string;
-}
-
 interface Profile {
   id: string;
   username: string;
@@ -28,21 +22,17 @@ interface Profile {
   created_at: string;
 }
 
-const fetchProfile = async (username: string): Promise<Profile> => {
+const fetchProfile = async (username: string): Promise<Profile | null> => {
   console.log('Fetching profile for username:', username);
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .ilike('username', username)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching profile:', error);
     throw error;
-  }
-
-  if (!data) {
-    throw new Error('Profile not found');
   }
 
   console.log('Fetched profile:', data);
