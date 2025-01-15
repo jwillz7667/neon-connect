@@ -14,9 +14,6 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          is_edited: boolean | null
-          likes_count: number | null
-          parent_comment_id: string | null
           post_id: string | null
           updated_at: string
           user_id: string | null
@@ -25,9 +22,6 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
-          is_edited?: boolean | null
-          likes_count?: number | null
-          parent_comment_id?: string | null
           post_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -36,21 +30,11 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
-          is_edited?: boolean | null
-          likes_count?: number | null
-          parent_comment_id?: string | null
           post_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "comments_parent_comment_id_fkey"
-            columns: ["parent_comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
@@ -61,6 +45,48 @@ export type Database = {
           {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -105,34 +131,24 @@ export type Database = {
       }
       likes: {
         Row: {
-          comment_id: string | null
           created_at: string
           id: string
           post_id: string | null
           user_id: string | null
         }
         Insert: {
-          comment_id?: string | null
           created_at?: string
           id?: string
           post_id?: string | null
           user_id?: string | null
         }
         Update: {
-          comment_id?: string | null
           created_at?: string
           id?: string
           post_id?: string | null
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "likes_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "likes_post_id_fkey"
             columns: ["post_id"]
@@ -149,104 +165,27 @@ export type Database = {
           },
         ]
       }
-      notifications: {
-        Row: {
-          content: Json
-          created_at: string
-          id: string
-          is_read: boolean | null
-          type: string
-          user_id: string | null
-        }
-        Insert: {
-          content: Json
-          created_at?: string
-          id?: string
-          is_read?: boolean | null
-          type: string
-          user_id?: string | null
-        }
-        Update: {
-          content?: Json
-          created_at?: string
-          id?: string
-          is_read?: boolean | null
-          type?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      post_tags: {
-        Row: {
-          created_at: string
-          post_id: string
-          tag_id: string
-        }
-        Insert: {
-          created_at?: string
-          post_id: string
-          tag_id: string
-        }
-        Update: {
-          created_at?: string
-          post_id?: string
-          tag_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_tags_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "post_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       posts: {
         Row: {
-          comments_count: number | null
           content: string
           created_at: string
           id: string
-          is_edited: boolean | null
-          likes_count: number | null
           media_urls: string[] | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          comments_count?: number | null
           content: string
           created_at?: string
           id?: string
-          is_edited?: boolean | null
-          likes_count?: number | null
           media_urls?: string[] | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          comments_count?: number | null
           content?: string
           created_at?: string
           id?: string
-          is_edited?: boolean | null
-          likes_count?: number | null
           media_urls?: string[] | null
           updated_at?: string
           user_id?: string | null
@@ -265,158 +204,132 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
-          city: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
-          is_verified: boolean | null
-          location: string | null
-          provider_since: string | null
-          state: string | null
+          role: string | null
           updated_at: string
           username: string | null
-          verification_documents: Json | null
-          verification_status: string | null
-          website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
-          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
-          is_verified?: boolean | null
-          location?: string | null
-          provider_since?: string | null
-          state?: string | null
+          role?: string | null
           updated_at?: string
           username?: string | null
-          verification_documents?: Json | null
-          verification_status?: string | null
-          website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
-          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
-          is_verified?: boolean | null
-          location?: string | null
-          provider_since?: string | null
-          state?: string | null
+          role?: string | null
           updated_at?: string
           username?: string | null
-          verification_documents?: Json | null
-          verification_status?: string | null
-          website?: string | null
         }
         Relationships: []
       }
-      subscriptions: {
+      team_invites: {
         Row: {
           created_at: string
-          current_period_end: string | null
+          email: string
+          expires_at: string
           id: string
-          status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          tier: string
-          updated_at: string
-          user_id: string | null
+          invited_by: string | null
+          token: string
+          used_at: string | null
         }
         Insert: {
           created_at?: string
-          current_period_end?: string | null
+          email: string
+          expires_at: string
           id?: string
-          status: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          tier: string
-          updated_at?: string
-          user_id?: string | null
+          invited_by?: string | null
+          token: string
+          used_at?: string | null
         }
         Update: {
           created_at?: string
-          current_period_end?: string | null
+          email?: string
+          expires_at?: string
           id?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          tier?: string
-          updated_at?: string
-          user_id?: string | null
+          invited_by?: string | null
+          token?: string
+          used_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
+            foreignKeyName: "team_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      tags: {
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
         Row: {
           created_at: string
           id: string
           name: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          updated_at?: string
         }
         Relationships: []
-      }
-      user_settings: {
-        Row: {
-          created_at: string
-          language_preference: string | null
-          notification_preferences: Json | null
-          privacy_settings: Json | null
-          theme_preference: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          language_preference?: string | null
-          notification_preferences?: Json | null
-          privacy_settings?: Json | null
-          theme_preference?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          language_preference?: string | null
-          notification_preferences?: Json | null
-          privacy_settings?: Json | null
-          theme_preference?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

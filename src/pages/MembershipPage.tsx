@@ -20,6 +20,7 @@ const MembershipPage = () => {
           description: "Please sign in to subscribe",
           variant: "destructive",
         });
+        navigate('/login');
         return;
       }
 
@@ -34,6 +35,8 @@ const MembershipPage = () => {
           tier: tier.toUpperCase(),
           status: 'active',
           current_period_end: futureDate.toISOString(),
+        }, {
+          onConflict: 'user_id'
         });
 
       if (subscriptionError) {
@@ -42,6 +45,19 @@ const MembershipPage = () => {
       }
 
       console.log('Subscription created successfully');
+
+      // Update profile provider status
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          provider_since: new Date().toISOString()
+        })
+        .eq('id', session.user.id);
+
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
 
       toast({
         title: "Subscription activated",

@@ -26,17 +26,13 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSubscribe }) => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        Choose Your Membership Plan
-      </h1>
-      
       <div className="grid md:grid-cols-2 gap-8 mt-8">
         <MembershipCard
           title="Standard Membership"
           price={100}
           features={standardFeatures}
           tier="standard"
-          onSubscribe={handleSubscribe}
+          onSubscribe={() => handleSubscribe('standard')}
         />
         
         <MembershipCard
@@ -45,7 +41,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ onSubscribe }) => {
           features={priorityFeatures}
           tier="priority"
           isPriority
-          onSubscribe={handleSubscribe}
+          onSubscribe={() => handleSubscribe('priority')}
         />
       </div>
     </div>
