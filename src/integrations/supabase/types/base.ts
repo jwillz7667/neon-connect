@@ -1,3 +1,7 @@
+import { CommentTable, ProfileTable, SubscriptionTable } from './tables';
+import { DirectMessageTable, FollowTable, LikeTable, PostTable } from './social';
+import { TeamInviteTable, TeamMemberTable, TeamTable } from './teams';
+
 export type Json =
   | string
   | number
