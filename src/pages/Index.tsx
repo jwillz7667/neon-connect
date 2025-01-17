@@ -51,7 +51,9 @@ const Index = () => {
           <h2 className="text-3xl font-bold mb-4 neon-text">Discover Amazing Profiles</h2>
           <p className="text-gray-300 mb-6">Browse our curated selection of profiles</p>
           <Link to="/membership">
-            <Button className="neon-text">Become a Provider</Button>
+            <Button variant="default" className="neon-text">
+              Become a Provider
+            </Button>
           </Link>
         </div>
         
