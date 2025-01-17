@@ -16,10 +16,13 @@ interface Profile {
   full_name: string;
   avatar_url: string;
   bio: string;
-  location: string;
   city: string;
   state: string;
+  website: string;
+  provider_since: string | null;
   created_at: string;
+  updated_at: string;
+  role: string;
 }
 
 const fetchProfile = async (username: string): Promise<Profile | null> => {
@@ -112,7 +115,7 @@ const ProfilePage = () => {
           <p className="text-gray-400">
             {profile.city && profile.state 
               ? `${profile.city}, ${profile.state}`
-              : profile.location || 'Location not specified'}
+              : 'Location not specified'}
           </p>
         </div>
 
