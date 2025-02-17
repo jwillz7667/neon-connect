@@ -11,16 +11,28 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          age: number | null
+          availability: string | null
           avatar_url: string | null
           bio: string | null
           birthdate: string | null
+          body_type: string | null
           city: string | null
+          contact_info: Json | null
           created_at: string
           email: string | null
+          ethnicity: string | null
+          eye_color: string | null
           full_name: string | null
+          hair_color: string | null
+          height: string | null
           id: string
+          languages: string[] | null
+          measurements: string | null
           provider_since: string | null
+          rates: Json | null
           role: string | null
+          services: string[] | null
           state: string | null
           updated_at: string
           username: string | null
@@ -30,16 +42,28 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          age?: number | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
+          body_type?: string | null
           city?: string | null
+          contact_info?: Json | null
           created_at?: string
           email?: string | null
+          ethnicity?: string | null
+          eye_color?: string | null
           full_name?: string | null
+          hair_color?: string | null
+          height?: string | null
           id: string
+          languages?: string[] | null
+          measurements?: string | null
           provider_since?: string | null
+          rates?: Json | null
           role?: string | null
+          services?: string[] | null
           state?: string | null
           updated_at?: string
           username?: string | null
@@ -49,16 +73,28 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          age?: number | null
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
+          body_type?: string | null
           city?: string | null
+          contact_info?: Json | null
           created_at?: string
           email?: string | null
+          ethnicity?: string | null
+          eye_color?: string | null
           full_name?: string | null
+          hair_color?: string | null
+          height?: string | null
           id?: string
+          languages?: string[] | null
+          measurements?: string | null
           provider_since?: string | null
+          rates?: Json | null
           role?: string | null
+          services?: string[] | null
           state?: string | null
           updated_at?: string
           username?: string | null

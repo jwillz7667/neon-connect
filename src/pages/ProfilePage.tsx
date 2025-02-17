@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -23,6 +24,18 @@ interface Profile {
   created_at: string;
   updated_at: string;
   role: string;
+  height: string | null;
+  body_type: string | null;
+  age: number | null;
+  rates: any | null;
+  contact_info: any | null;
+  ethnicity: string | null;
+  hair_color: string | null;
+  eye_color: string | null;
+  measurements: string | null;
+  languages: string[] | null;
+  availability: string | null;
+  services: string[] | null;
 }
 
 const fetchProfile = async (username: string): Promise<Profile | null> => {
@@ -117,25 +130,92 @@ const ProfilePage = () => {
               ? `${profile.city}, ${profile.state}`
               : 'Location not specified'}
           </p>
+          {profile.age && (
+            <p className="text-gray-400">Age: {profile.age}</p>
+          )}
         </div>
 
         {/* Stats */}
         <div className="glass-card p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold mb-4 neon-text">Stats</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <p className="text-gray-400">Member Since</p>
-              <p className="font-medium">
-                {new Date(profile.created_at).toLocaleDateString()}
-              </p>
+              <p className="text-gray-400">Height</p>
+              <p className="font-medium">{profile.height || 'Not specified'}</p>
             </div>
             <div>
-              <p className="text-gray-400">Profile Views</p>
-              <p className="font-medium">0</p>
+              <p className="text-gray-400">Body Type</p>
+              <p className="font-medium">{profile.body_type || 'Not specified'}</p>
             </div>
             <div>
-              <p className="text-gray-400">Status</p>
-              <p className="font-medium">Active</p>
+              <p className="text-gray-400">Ethnicity</p>
+              <p className="font-medium">{profile.ethnicity || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="text-gray-400">Hair Color</p>
+              <p className="font-medium">{profile.hair_color || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="text-gray-400">Eye Color</p>
+              <p className="font-medium">{profile.eye_color || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="text-gray-400">Measurements</p>
+              <p className="font-medium">{profile.measurements || 'Not specified'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Languages and Services */}
+        <div className="glass-card p-6 rounded-lg mb-8">
+          <h2 className="text-xl font-semibold mb-4 neon-text">Languages & Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Languages</h3>
+              {profile.languages && profile.languages.length > 0 ? (
+                <ul className="list-disc list-inside">
+                  {profile.languages.map((lang, index) => (
+                    <li key={index} className="text-gray-300">{lang}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-400">No languages specified</p>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-medium mb-2">Services</h3>
+              {profile.services && profile.services.length > 0 ? (
+                <ul className="list-disc list-inside">
+                  {profile.services.map((service, index) => (
+                    <li key={index} className="text-gray-300">{service}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-400">No services specified</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Rates and Contact Info */}
+        <div className="glass-card p-6 rounded-lg mb-8">
+          <h2 className="text-xl font-semibold mb-4 neon-text">Rates & Availability</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {profile.rates && (
+              <div>
+                <h3 className="text-lg font-medium mb-2">Rates</h3>
+                <div className="space-y-2">
+                  {Object.entries(profile.rates).map(([duration, rate]) => (
+                    <p key={duration} className="text-gray-300">
+                      {duration}: ${rate}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <h3 className="text-lg font-medium mb-2">Availability</h3>
+              <p className="text-gray-300">{profile.availability || 'Not specified'}</p>
             </div>
           </div>
         </div>
