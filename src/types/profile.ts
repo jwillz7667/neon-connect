@@ -7,6 +7,7 @@ export interface ProfileFormData {
   state: string;
   website: string;
   avatarUrl: string;
+  avatarFile?: File;
   height: string;
   bodyType: string;
   age: number;

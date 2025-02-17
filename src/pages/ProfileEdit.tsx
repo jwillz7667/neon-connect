@@ -61,6 +61,7 @@ const ProfileEdit = () => {
 
       if (error) throw error;
 
+      // Parse JSON fields with type checking
       const rates = typeof profile.rates === 'object' ? profile.rates : {};
       const contactInfo = typeof profile.contact_info === 'object' ? profile.contact_info : {};
 
@@ -104,14 +105,13 @@ const ProfileEdit = () => {
       if (!user) throw new Error('No user found');
 
       let avatarUrl = data.avatarUrl;
-      if (form.getValues('avatarFile')) {
-        const avatarFile = form.getValues('avatarFile');
-        const fileExt = avatarFile.name.split('.').pop();
+      if (data.avatarFile) {
+        const fileExt = data.avatarFile.name.split('.').pop();
         const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('avatars')
-          .upload(filePath, avatarFile);
+          .upload(filePath, data.avatarFile);
 
         if (uploadError) throw uploadError;
         avatarUrl = filePath;
