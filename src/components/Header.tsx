@@ -64,45 +64,47 @@ const Header = () => {
               <Bell size={20} />
             </Link>
 
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-transparent text-white/90 hover:text-primary hover:bg-transparent data-[state=open]:bg-transparent p-2">
-                    <User size={20} />
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="min-w-[220px] bg-black/95 border border-primary/20">
-                    <ul className="p-2 space-y-1">
-                      <li>
-                        <Link to="/profile" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
-                          My Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/settings" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          to="/membership" 
-                          className="block px-4 py-2 rounded hover:bg-primary/10 transition-colors"
-                        >
-                          <span className="flex items-center gap-2 text-primary">
-                            <Crown size={16} />
-                            Become a Provider
-                          </span>
-                        </Link>
-                      </li>
-                      <li className="border-t border-white/10 mt-2 pt-2">
-                        <button className="w-full text-left px-4 py-2 rounded hover:bg-primary/10 transition-colors text-red-400">
-                          Sign Out
-                        </button>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+            <div className="relative">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="bg-transparent text-white/90 hover:text-primary hover:bg-transparent data-[state=open]:bg-transparent p-2">
+                      <User size={20} />
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="absolute right-0 min-w-[220px] bg-black/95 border border-primary/20">
+                      <ul className="p-2 space-y-1">
+                        <li>
+                          <Link to="/profile" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
+                            My Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/settings" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
+                            Settings
+                          </Link>
+                        </li>
+                        <li>
+                          <Link 
+                            to="/membership" 
+                            className="block px-4 py-2 rounded hover:bg-primary/10 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-primary">
+                              <Crown size={16} />
+                              Become a Provider
+                            </span>
+                          </Link>
+                        </li>
+                        <li className="border-t border-white/10 mt-2 pt-2">
+                          <button className="w-full text-left px-4 py-2 rounded hover:bg-primary/10 transition-colors text-red-400">
+                            Sign Out
+                          </button>
+                        </li>
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
 
             {/* Mobile Menu Button */}
             <button 
