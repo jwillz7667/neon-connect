@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -57,8 +58,19 @@ const fetchProfile = async (username: string): Promise<Profile | null> => {
     throw error;
   }
 
-  console.log('Fetched profile:', data);
-  return data;
+  if (!data) return null;
+
+  // Transform the data to match our Profile interface
+  const profile: Profile = {
+    ...data,
+    rates: typeof data.rates === 'object' ? data.rates as { hourly?: number; daily?: number } : null,
+    contact_info: typeof data.contact_info === 'object' ? data.contact_info as { email?: string; phone?: string; preferred?: string } : null,
+    languages: Array.isArray(data.languages) ? data.languages : null,
+    services: Array.isArray(data.services) ? data.services : null,
+  };
+
+  console.log('Fetched profile:', profile);
+  return profile;
 };
 
 const ProfilePage = () => {
