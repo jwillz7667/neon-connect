@@ -14,7 +14,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4 md:gap-8">
             <Link to="/" className="text-xl md:text-2xl font-bold neon-text whitespace-nowrap">
-              NeonConnect
+              Adult Connect
             </Link>
 
             {/* Desktop Navigation */}
