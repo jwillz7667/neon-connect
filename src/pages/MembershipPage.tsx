@@ -16,11 +16,15 @@ const MembershipPage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.log('No session found, redirecting to login...');
         toast({
           title: "Authentication required",
           description: "Please sign in to subscribe",
           variant: "destructive",
         });
+        // Store the selected tier and return URL in localStorage
+        localStorage.setItem('selectedTier', tier);
+        localStorage.setItem('redirectAfterLogin', '/membership');
         navigate('/login');
         return;
       }
@@ -63,6 +67,10 @@ const MembershipPage = () => {
         description: "You can now proceed with verification",
       });
 
+      // Clear stored tier and redirect after successful subscription
+      localStorage.removeItem('selectedTier');
+      localStorage.removeItem('redirectAfterLogin');
+      
       // Redirect to provider onboarding
       navigate('/provider-onboarding');
       
@@ -76,6 +84,21 @@ const MembershipPage = () => {
     }
   };
 
+  // Check for stored tier on component mount
+  React.useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const storedTier = localStorage.getItem('selectedTier') as 'standard' | 'priority' | null;
+        if (storedTier) {
+          handleSubscribe(storedTier);
+        }
+      }
+    };
+    
+    checkSession();
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-12 neon-text">Membership Plans</h1>
@@ -85,3 +108,4 @@ const MembershipPage = () => {
 };
 
 export default MembershipPage;
+
