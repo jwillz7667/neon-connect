@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -27,8 +26,15 @@ interface Profile {
   height: string | null;
   body_type: string | null;
   age: number | null;
-  rates: any | null;
-  contact_info: any | null;
+  rates: {
+    hourly?: number;
+    daily?: number;
+  } | null;
+  contact_info: {
+    email?: string;
+    phone?: string;
+    preferred?: string;
+  } | null;
   ethnicity: string | null;
   hair_color: string | null;
   eye_color: string | null;
@@ -89,7 +95,6 @@ const ProfilePage = () => {
     );
   }
 
-  // Default images if none are provided
   const images = [
     "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
     "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
@@ -98,7 +103,6 @@ const ProfilePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-20">
-      {/* Image Carousel */}
       <div className="max-w-2xl mx-auto mb-8">
         <Carousel className="w-full">
           <CarouselContent>
@@ -119,7 +123,6 @@ const ProfilePage = () => {
         </Carousel>
       </div>
 
-      {/* Profile Info */}
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 neon-text">
@@ -135,7 +138,6 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Stats */}
         <div className="glass-card p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold mb-4 neon-text">Stats</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -166,7 +168,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Languages and Services */}
         <div className="glass-card p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold mb-4 neon-text">Languages & Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -197,17 +198,16 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Rates and Contact Info */}
         <div className="glass-card p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold mb-4 neon-text">Rates & Availability</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {profile.rates && (
+            {profile.rates && Object.keys(profile.rates).length > 0 && (
               <div>
                 <h3 className="text-lg font-medium mb-2">Rates</h3>
                 <div className="space-y-2">
                   {Object.entries(profile.rates).map(([duration, rate]) => (
                     <p key={duration} className="text-gray-300">
-                      {duration}: ${rate}
+                      {duration.charAt(0).toUpperCase() + duration.slice(1)}: ${rate}
                     </p>
                   ))}
                 </div>
@@ -220,7 +220,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Bio */}
         <div className="glass-card p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 neon-text">About Me</h2>
           <p className="text-gray-300 leading-relaxed">

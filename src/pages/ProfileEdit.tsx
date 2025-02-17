@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -123,6 +122,9 @@ const ProfileEdit = () => {
 
       if (error) throw error;
 
+      const rates = typeof profile.rates === 'object' ? profile.rates : {};
+      const contactInfo = typeof profile.contact_info === 'object' ? profile.contact_info : {};
+
       form.reset({
         username: profile.username || '',
         fullName: profile.full_name || '',
@@ -141,8 +143,8 @@ const ProfileEdit = () => {
         languages: profile.languages || [],
         availability: profile.availability || '',
         services: profile.services || [],
-        rates: profile.rates || {},
-        contactInfo: profile.contact_info || {},
+        rates: rates as { hourly?: number; daily?: number },
+        contactInfo: contactInfo as { email?: string; phone?: string; preferred?: string },
       });
     } catch (error) {
       console.error('Error loading profile:', error);
