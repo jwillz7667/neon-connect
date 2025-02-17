@@ -10,16 +10,16 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
-      <div className="container mx-auto">
-        <div className="flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="text-2xl font-bold neon-text">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-4 md:gap-8">
+            <Link to="/" className="text-xl md:text-2xl font-bold neon-text whitespace-nowrap">
               NeonConnect
             </Link>
 
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
-              <NavigationMenuList className="flex gap-6">
+              <NavigationMenuList className="flex gap-4">
                 <NavigationMenuItem>
                   <Link to="/" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
                     <Home size={20} />
@@ -62,7 +62,7 @@ const Header = () => {
             </NavigationMenu>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Link to="/search" className="p-2 text-white/90 hover:text-primary transition-colors rounded-full hover:bg-white/5">
               <Search size={20} />
             </Link>
@@ -74,7 +74,7 @@ const Header = () => {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-transparent text-white/90 hover:text-primary hover:bg-transparent data-[state=open]:bg-transparent">
+                  <NavigationMenuTrigger className="bg-transparent text-white/90 hover:text-primary hover:bg-transparent data-[state=open]:bg-transparent p-2">
                     <User size={20} />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="min-w-[220px] bg-black/95 border border-primary/20">
@@ -126,7 +126,7 @@ const Header = () => {
           "md:hidden fixed inset-x-0 top-16 bg-black/95 border-b border-white/10 transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
         )}>
-          <nav className="container py-4">
+          <nav className="px-4 py-4">
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-lg text-white/90">
