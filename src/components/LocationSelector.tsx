@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Select,
@@ -30,7 +31,12 @@ const LocationSelector = ({ onStateChange, selectedState }: LocationSelectorProp
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a state" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent 
+          className="bg-black border border-primary/20 shadow-lg min-w-[200px]" 
+          position="popper" 
+          align="start"
+          side="bottom"
+        >
           <SelectItem value="all">All States</SelectItem>
           {states.map((state) => (
             <SelectItem key={state} value={state}>
