@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ProfileCard from '../ProfileCard';
 import { Database } from '@/integrations/supabase/types';
@@ -12,11 +13,29 @@ interface ProfileGridProps {
 
 const ProfileGrid = ({ profiles, isLoading, error }: ProfileGridProps) => {
   if (isLoading) {
-    return <div className="text-center">Loading profiles...</div>;
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="mt-4 text-gray-400">Loading profiles...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500">Error loading profiles. Please try again later.</div>;
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500 mb-2">Error loading profiles</p>
+        <p className="text-gray-400">Please try refreshing the page</p>
+      </div>
+    );
+  }
+
+  if (profiles.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-400">No profiles found</p>
+      </div>
+    );
   }
 
   return (
@@ -25,7 +44,7 @@ const ProfileGrid = ({ profiles, isLoading, error }: ProfileGridProps) => {
         <ProfileCard
           key={profile.id}
           name={profile.full_name || 'Anonymous'}
-          age={28}
+          age={profile.age || undefined}
           location={`${profile.city || ''}, ${profile.state || ''}`}
           imageUrl={profile.avatar_url || '/placeholder.svg'}
           distance="2 miles"

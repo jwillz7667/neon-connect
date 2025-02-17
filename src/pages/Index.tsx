@@ -1,14 +1,17 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import HeroSection from '@/components/home/HeroSection';
 import ProfileTabs from '@/components/home/ProfileTabs';
 import { Database } from '@/integrations/supabase/types';
+import { useToast } from '@/components/ui/use-toast';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const Index = () => {
   const [selectedState, setSelectedState] = useState('all');
+  const { toast } = useToast();
 
   const { data: profiles = [], isLoading, error } = useQuery({
     queryKey: ['profiles', selectedState],
@@ -27,6 +30,11 @@ const Index = () => {
         
         if (error) {
           console.error('Supabase error:', error);
+          toast({
+            title: "Error loading profiles",
+            description: "Please try again later.",
+            variant: "destructive",
+          });
           throw error;
         }
         
@@ -34,6 +42,11 @@ const Index = () => {
         return data as Profile[];
       } catch (err) {
         console.error('Error in query function:', err);
+        toast({
+          title: "Error loading profiles",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
         throw err;
       }
     },
