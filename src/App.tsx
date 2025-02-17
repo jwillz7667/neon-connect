@@ -6,6 +6,8 @@ import MembershipPage from './pages/MembershipPage';
 import ProfileEdit from './pages/ProfileEdit';
 import ProviderOnboarding from './pages/ProviderOnboarding';
 import LoginPage from './pages/auth/LoginPage';
+import SearchPage from './pages/SearchPage';
+import SettingsPage from './pages/SettingsPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -22,6 +24,8 @@ function App() {
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/provider-onboarding" element={<ProviderOnboarding />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
         <Footer />

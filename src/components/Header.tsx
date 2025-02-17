@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from "@/components/ui/navigation-menu";
-import { Search, Crown, Menu, User, Bell, MessageSquare, Home } from "lucide-react";
+import { Search, Crown, Menu, User, Bell, Home } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 
@@ -50,13 +50,6 @@ const Header = () => {
                       </li>
                     </ul>
                   </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <Link to="/messages" className="flex items-center gap-2 text-white/90 hover:text-primary transition-colors">
-                    <MessageSquare size={20} />
-                    <span>Messages</span>
-                  </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -138,12 +131,6 @@ const Header = () => {
                 <Link to="/search" className="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-lg text-white/90">
                   <Search size={20} />
                   <span>Search</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/messages" className="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-lg text-white/90">
-                  <MessageSquare size={20} />
-                  <span>Messages</span>
                 </Link>
               </li>
               <li>
