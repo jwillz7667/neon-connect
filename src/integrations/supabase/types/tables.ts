@@ -56,6 +56,10 @@ export interface ProfileTable {
     created_at: string
     updated_at: string
     role: string | null
+    verification_status: string | null
+    verification_documents: Json | null
+    birthdate: string | null
+    verified_at: string | null
   }
   Insert: {
     id: string
@@ -71,6 +75,10 @@ export interface ProfileTable {
     created_at?: string
     updated_at?: string
     role?: string | null
+    verification_status?: string | null
+    verification_documents?: Json | null
+    birthdate?: string | null
+    verified_at?: string | null
   }
   Update: {
     id?: string
@@ -86,8 +94,56 @@ export interface ProfileTable {
     created_at?: string
     updated_at?: string
     role?: string | null
+    verification_status?: string | null
+    verification_documents?: Json | null
+    birthdate?: string | null
+    verified_at?: string | null
   }
   Relationships: []
+}
+
+export interface VerificationRequestTable {
+  Row: {
+    id: string
+    user_id: string
+    status: string
+    documents: Json | null
+    submitted_at: string
+    reviewed_at: string | null
+    reviewer_notes: string | null
+    created_at: string
+    updated_at: string
+  }
+  Insert: {
+    id?: string
+    user_id: string
+    status?: string
+    documents?: Json | null
+    submitted_at?: string
+    reviewed_at?: string | null
+    reviewer_notes?: string | null
+    created_at?: string
+    updated_at?: string
+  }
+  Update: {
+    id?: string
+    user_id?: string
+    status?: string
+    documents?: Json | null
+    submitted_at?: string
+    reviewed_at?: string | null
+    reviewer_notes?: string | null
+    created_at?: string
+    updated_at?: string
+  }
+  Relationships: [
+    {
+      foreignKeyName: "verification_requests_user_id_fkey"
+      columns: ["user_id"]
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+  ]
 }
 
 export interface SubscriptionTable {

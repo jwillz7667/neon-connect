@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birthdate: string | null
           city: string | null
           created_at: string
           email: string | null
@@ -23,11 +24,15 @@ export type Database = {
           state: string | null
           updated_at: string
           username: string | null
+          verification_documents: Json | null
+          verification_status: string | null
+          verified_at: string | null
           website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birthdate?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
@@ -38,11 +43,15 @@ export type Database = {
           state?: string | null
           updated_at?: string
           username?: string | null
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verified_at?: string | null
           website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birthdate?: string | null
           city?: string | null
           created_at?: string
           email?: string | null
@@ -53,6 +62,9 @@ export type Database = {
           state?: string | null
           updated_at?: string
           username?: string | null
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verified_at?: string | null
           website?: string | null
         }
         Relationships: []
@@ -84,6 +96,42 @@ export type Database = {
           tier?: string
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          created_at: string | null
+          documents: Json | null
+          id: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          documents?: Json | null
+          id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          documents?: Json | null
+          id?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

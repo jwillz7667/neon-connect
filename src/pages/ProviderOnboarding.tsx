@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -72,6 +73,21 @@ const ProviderOnboarding = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
+
+      // Check age (must be 18 or older)
+      const birthDate = new Date(data.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (age < 18 || (age === 18 && monthDiff < 0)) {
+        toast({
+          title: "Age Verification Failed",
+          description: "You must be 18 or older to become a provider.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Upload ID document
       let documentUrl = null;
