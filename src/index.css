@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +17,7 @@
 
 @layer components {
   .glass-card {
-    @apply backdrop-blur-lg bg-black/30 border border-primary/20 shadow-lg;
+    @apply backdrop-blur-lg bg-black/95 border border-primary/20 shadow-lg;
   }
   
   .neon-border {
@@ -25,5 +26,20 @@
   
   .neon-text {
     @apply text-primary drop-shadow-[0_0_8px_rgba(217,70,239,0.8)];
+  }
+
+  /* Navigation menu overrides */
+  [data-radix-popper-content-wrapper] {
+    @apply z-50 !important;
+  }
+
+  .navigation-menu-content {
+    @apply animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 
+    data-[side=top]:slide-in-from-bottom-2 relative mt-2 !important;
+  }
+
+  /* State overrides for navigation triggers */
+  [data-state=open] {
+    @apply bg-transparent !important;
   }
 }
