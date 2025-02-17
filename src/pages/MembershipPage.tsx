@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PricingSection from '../components/pricing/PricingSection';
@@ -35,8 +36,6 @@ const MembershipPage = () => {
           tier: tier.toUpperCase(),
           status: 'active',
           current_period_end: futureDate.toISOString(),
-        }, {
-          onConflict: 'user_id'
         });
 
       if (subscriptionError) {
