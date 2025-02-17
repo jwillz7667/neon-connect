@@ -29,25 +29,53 @@ const MembershipPage = () => {
         return;
       }
 
-      console.log('User is authenticated, creating subscription...');
+      console.log('User is authenticated, checking existing subscription...');
 
-      // For development: directly update subscription status
-      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      const { error: subscriptionError } = await supabase
+      // Check for existing subscription
+      const { data: existingSubscription } = await supabase
         .from('subscriptions')
-        .upsert({
-          user_id: session.user.id,
-          tier: tier.toUpperCase(),
-          status: 'active',
-          current_period_end: futureDate.toISOString(),
-        });
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
 
-      if (subscriptionError) {
-        console.error('Subscription error:', subscriptionError);
-        throw subscriptionError;
+      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      
+      if (existingSubscription) {
+        console.log('Updating existing subscription...');
+        // Update existing subscription
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            tier: tier.toUpperCase(),
+            status: 'active',
+            current_period_end: futureDate.toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', session.user.id);
+
+        if (updateError) {
+          console.error('Subscription update error:', updateError);
+          throw updateError;
+        }
+      } else {
+        console.log('Creating new subscription...');
+        // Create new subscription
+        const { error: subscriptionError } = await supabase
+          .from('subscriptions')
+          .insert({
+            user_id: session.user.id,
+            tier: tier.toUpperCase(),
+            status: 'active',
+            current_period_end: futureDate.toISOString()
+          });
+
+        if (subscriptionError) {
+          console.error('Subscription creation error:', subscriptionError);
+          throw subscriptionError;
+        }
       }
 
-      console.log('Subscription created successfully');
+      console.log('Subscription processed successfully');
 
       // Update profile provider status
       const { error: profileError } = await supabase
@@ -108,4 +136,3 @@ const MembershipPage = () => {
 };
 
 export default MembershipPage;
-
