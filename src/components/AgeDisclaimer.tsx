@@ -39,7 +39,7 @@ const AgeDisclaimer = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="glass-card border-primary/20">
+      <DialogContent className="glass-card border-primary/20 z-50">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Age Verification Required</DialogTitle>
           <DialogDescription className="text-lg pt-4">
