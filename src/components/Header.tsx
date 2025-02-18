@@ -1,12 +1,53 @@
-
 import React from 'react';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from "@/components/ui/navigation-menu";
 import { Search, Crown, Menu, User, Bell, Home } from "lucide-react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 const Header = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account."
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing you out. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const navigateToProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.username) {
+        navigate(`/profile/${profile.username}`);
+      } else {
+        navigate('/profile/edit');
+      }
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
@@ -75,9 +116,12 @@ const Header = () => {
                       <NavigationMenuContent className="relative min-w-[220px] bg-black/95 border border-primary/20 shadow-lg">
                         <ul className="p-2 space-y-1">
                           <li>
-                            <Link to="/profile" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
+                            <button 
+                              onClick={navigateToProfile}
+                              className="w-full text-left px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors"
+                            >
                               My Profile
-                            </Link>
+                            </button>
                           </li>
                           <li>
                             <Link to="/settings" className="block px-4 py-2 rounded hover:bg-primary/10 text-white/90 transition-colors">
@@ -96,7 +140,10 @@ const Header = () => {
                             </Link>
                           </li>
                           <li className="border-t border-white/10 mt-2 pt-2">
-                            <button className="w-full text-left px-4 py-2 rounded hover:bg-primary/10 transition-colors text-red-400">
+                            <button 
+                              onClick={handleSignOut}
+                              className="w-full text-left px-4 py-2 rounded hover:bg-primary/10 transition-colors text-red-400"
+                            >
                               Sign Out
                             </button>
                           </li>
