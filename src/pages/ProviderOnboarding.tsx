@@ -3,11 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Form } from '@/components/ui/form';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import PersonalInfoSection from '@/components/onboarding/PersonalInfoSection';
+import AddressSection from '@/components/onboarding/AddressSection';
+import VerificationDocumentsSection from '@/components/onboarding/VerificationDocumentsSection';
+import BioSection from '@/components/onboarding/BioSection';
+import { validateAge, validateImageFile } from '@/services/verificationService';
 
 interface VerificationFormData {
   fullName: string;
@@ -71,44 +74,6 @@ const ProviderOnboarding = () => {
     }
   };
 
-  const validateAge = (dateOfBirth: string): boolean => {
-    const birthDate = new Date(dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age >= 18;
-  };
-
-  const validateImageFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    
-    if (!validTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, or WebP image",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (file.size > maxSize) {
-      toast({
-        title: "File too large",
-        description: "Image must be less than 10MB",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
-  };
-
   const onSubmit = async (data: VerificationFormData) => {
     setIsLoading(true);
     try {
@@ -136,7 +101,24 @@ const ProviderOnboarding = () => {
       }
 
       // Validate file types and sizes
-      if (!validateImageFile(data.idDocument) || !validateImageFile(data.selfieWithId)) {
+      const idValidation = validateImageFile(data.idDocument);
+      const selfieValidation = validateImageFile(data.selfieWithId);
+
+      if (!idValidation.isValid) {
+        toast({
+          title: idValidation.error!.title,
+          description: idValidation.error!.description,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!selfieValidation.isValid) {
+        toast({
+          title: selfieValidation.error!.title,
+          description: selfieValidation.error!.description,
+          variant: "destructive",
+        });
         return;
       }
 
@@ -212,150 +194,10 @@ const ProviderOnboarding = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Legal Name (as shown on ID)</FormLabel>
-                  <FormControl>
-                    <Input {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dateOfBirth"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <FormControl>
-                    <Input type="date" max={currentDate} {...field} required />
-                  </FormControl>
-                  <FormDescription>
-                    You must be 18 or older to register as a provider
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input {...field} required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input {...field} required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="idDocument"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Government-Issued ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => onChange(e.target.files?.[0] || null)}
-                      {...field}
-                      required
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload a clear photo of your government-issued ID
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="selfieWithId"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Verification Selfie</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => onChange(e.target.files?.[0] || null)}
-                      {...field}
-                      required
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload a selfie of yourself holding:
-                    <ul className="list-disc pl-6 mt-2 space-y-1">
-                      <li>Your government-issued ID (visible in the photo)</li>
-                      <li>A paper with today's date ({currentDate})</li>
-                      <li>Your username written on the paper</li>
-                      <li>The site name written on the paper</li>
-                    </ul>
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bio</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field}
-                      placeholder="Tell potential clients about yourself..."
-                      className="h-32"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <PersonalInfoSection form={form} currentDate={currentDate} />
+            <AddressSection form={form} />
+            <VerificationDocumentsSection form={form} currentDate={currentDate} />
+            <BioSection form={form} />
 
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? 'Submitting...' : 'Submit for Verification'}
