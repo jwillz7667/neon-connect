@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,6 +16,7 @@ interface VerificationFormData {
   city: string;
   state: string;
   idDocument: File | null;
+  selfieWithId: File | null;
   bio: string;
 }
 
@@ -24,6 +25,7 @@ const ProviderOnboarding = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const currentDate = new Date().toISOString().split('T')[0];
 
   const form = useForm<VerificationFormData>({
     defaultValues: {
@@ -33,6 +35,7 @@ const ProviderOnboarding = () => {
       city: '',
       state: '',
       idDocument: null,
+      selfieWithId: null,
       bio: '',
     },
   });
@@ -68,19 +71,52 @@ const ProviderOnboarding = () => {
     }
   };
 
+  const validateAge = (dateOfBirth: string): boolean => {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age >= 18;
+  };
+
+  const validateImageFile = (file: File): boolean => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a JPEG, PNG, or WebP image",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 10MB",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const onSubmit = async (data: VerificationFormData) => {
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
-      // Check age (must be 18 or older)
-      const birthDate = new Date(data.dateOfBirth);
-      const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      if (age < 18 || (age === 18 && monthDiff < 0)) {
+      // Validate age
+      if (!validateAge(data.dateOfBirth)) {
         toast({
           title: "Age Verification Failed",
           description: "You must be 18 or older to become a provider.",
@@ -89,19 +125,38 @@ const ProviderOnboarding = () => {
         return;
       }
 
-      // Upload ID document
-      let documentUrl = null;
-      if (data.idDocument) {
-        const fileExt = data.idDocument.name.split('.').pop();
-        const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('verification-documents')
-          .upload(filePath, data.idDocument);
-
-        if (uploadError) throw uploadError;
-        documentUrl = filePath;
+      // Validate required files
+      if (!data.idDocument || !data.selfieWithId) {
+        toast({
+          title: "Missing Documents",
+          description: "Both ID document and verification selfie are required.",
+          variant: "destructive",
+        });
+        return;
       }
+
+      // Validate file types and sizes
+      if (!validateImageFile(data.idDocument) || !validateImageFile(data.selfieWithId)) {
+        return;
+      }
+
+      // Upload ID document
+      const idExt = data.idDocument.name.split('.').pop();
+      const idPath = `${user.id}/id_${crypto.randomUUID()}.${idExt}`;
+      const { error: idUploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(idPath, data.idDocument);
+
+      if (idUploadError) throw idUploadError;
+
+      // Upload selfie with ID
+      const selfieExt = data.selfieWithId.name.split('.').pop();
+      const selfiePath = `${user.id}/selfie_${crypto.randomUUID()}.${selfieExt}`;
+      const { error: selfieUploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(selfiePath, data.selfieWithId);
+
+      if (selfieUploadError) throw selfieUploadError;
 
       // Update profile with verification data
       const { error: updateError } = await supabase
@@ -112,9 +167,11 @@ const ProviderOnboarding = () => {
           state: data.state,
           bio: data.bio,
           verification_documents: {
-            id_document: documentUrl,
+            id_document: idPath,
+            selfie_with_id: selfiePath,
             date_of_birth: data.dateOfBirth,
             address: data.address,
+            submission_date: new Date().toISOString(),
           },
           verification_status: 'pending',
         })
@@ -124,7 +181,7 @@ const ProviderOnboarding = () => {
 
       toast({
         title: "Verification submitted",
-        description: "Your verification documents have been submitted for review.",
+        description: "Your verification documents have been submitted for review. Please allow 24-48 hours for processing.",
       });
 
       navigate('/profile/edit');
@@ -141,7 +198,7 @@ const ProviderOnboarding = () => {
   };
 
   if (!isSubscribed) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   return (
@@ -160,7 +217,7 @@ const ProviderOnboarding = () => {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Legal Name</FormLabel>
+                  <FormLabel>Full Legal Name (as shown on ID)</FormLabel>
                   <FormControl>
                     <Input {...field} required />
                   </FormControl>
@@ -176,8 +233,11 @@ const ProviderOnboarding = () => {
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} required />
+                    <Input type="date" max={currentDate} {...field} required />
                   </FormControl>
+                  <FormDescription>
+                    You must be 18 or older to register as a provider
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -236,12 +296,44 @@ const ProviderOnboarding = () => {
                   <FormControl>
                     <Input
                       type="file"
-                      accept="image/*,.pdf"
+                      accept="image/*"
                       onChange={(e) => onChange(e.target.files?.[0] || null)}
                       {...field}
                       required
                     />
                   </FormControl>
+                  <FormDescription>
+                    Upload a clear photo of your government-issued ID
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="selfieWithId"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Verification Selfie</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => onChange(e.target.files?.[0] || null)}
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload a selfie of yourself holding:
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>Your government-issued ID (visible in the photo)</li>
+                      <li>A paper with today's date ({currentDate})</li>
+                      <li>Your username written on the paper</li>
+                      <li>The site name written on the paper</li>
+                    </ul>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
