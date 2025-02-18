@@ -64,7 +64,7 @@ const CategoriesPage = () => {
           const Icon = category.icon;
           return (
             <Link key={category.title} to={category.link}>
-              <Card className="hover:bg-primary/5 transition-colors cursor-pointer border-primary/20">
+              <Card className="glass-card hover:bg-primary/5 transition-colors cursor-pointer border-primary/20 rounded-xl backdrop-blur-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Icon className="w-5 h-5 text-primary" />
