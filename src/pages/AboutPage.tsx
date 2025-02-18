@@ -8,7 +8,7 @@ const AboutPage = () => {
         <h1 className="text-4xl font-bold mb-6">About Us</h1>
         <div className="space-y-6">
           <p className="text-lg">
-            Welcome to NeonConnect, your premier platform for connecting with verified companions and event partners. Founded with the vision of creating meaningful connections, we strive to provide a safe, respectful, and professional environment for our community.
+            Welcome to Adult Connect, your premier platform for connecting with verified companions and event partners. Founded with the vision of creating meaningful connections, we strive to provide a safe, respectful, and professional environment for our community.
           </p>
           <h2 className="text-2xl font-semibold mt-8">Our Mission</h2>
           <p className="text-lg">
