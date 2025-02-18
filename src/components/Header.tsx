@@ -113,7 +113,7 @@ const Header = () => {
                     <NavigationMenuTrigger className="bg-transparent text-white/90 hover:text-primary hover:bg-transparent data-[state=open]:bg-transparent p-2">
                       <User size={20} />
                     </NavigationMenuTrigger>
-                    <div className="absolute top-full right-0 transform -translate-x-[90%] pt-2">
+                    <div className="absolute top-full right-0 transform -translate-x-[180px] pt-2">
                       <NavigationMenuContent className="relative min-w-[220px] bg-black/95 border border-primary/20 shadow-lg">
                         <ul className="p-2 space-y-1">
                           <li>
