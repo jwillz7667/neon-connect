@@ -6,12 +6,15 @@ import { Search } from 'lucide-react';
 import ProfileCard from '@/components/ProfileCard';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useSearchParams } from 'react-router-dom';
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get('category');
 
   const { data: profiles, isLoading } = useQuery({
-    queryKey: ['profiles', searchQuery],
+    queryKey: ['profiles', searchQuery, category],
     queryFn: async () => {
       let query = supabase
         .from('profiles')
@@ -22,7 +25,24 @@ const SearchPage = () => {
         query = query.or(`username.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      // Apply category filters if present
+      if (category) {
+        switch (category) {
+          case 'new':
+            query = query.order('created_at', { ascending: false });
+            break;
+          case 'featured':
+            query = query.eq('role', 'provider');
+            break;
+          case 'active':
+            // This is a placeholder - in a real app you'd track user activity
+            query = query.order('updated_at', { ascending: false });
+            break;
+          // Add more category filters as needed
+        }
+      }
+
+      const { data, error } = await query.limit(20);
       if (error) throw error;
       return data;
     },
@@ -43,6 +63,17 @@ const SearchPage = () => {
             Search
           </Button>
         </div>
+
+        {category && (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2 capitalize">
+              {category === 'new' ? 'New Members' :
+               category === 'featured' ? 'Featured Profiles' :
+               category === 'active' ? 'Most Active' :
+               category.charAt(0).toUpperCase() + category.slice(1)}
+            </h2>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="text-center">Loading...</div>

@@ -14,6 +14,8 @@ import TermsPage from './pages/TermsPage';
 import HelpPage from './pages/HelpPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
+import CategoriesPage from './pages/CategoriesPage';
+import FeaturedPage from './pages/FeaturedPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -38,6 +40,8 @@ function App() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/featured" element={<FeaturedPage />} />
           </Routes>
         </main>
         <Footer />
