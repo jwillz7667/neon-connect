@@ -32,7 +32,7 @@ const LocationSelector = ({ onStateChange, selectedState }: LocationSelectorProp
           <SelectValue placeholder="Select a state" />
         </SelectTrigger>
         <SelectContent 
-          className="bg-black border border-primary/20 shadow-lg min-w-[200px]" 
+          className="bg-black/100 border border-primary/20 shadow-lg min-w-[200px]" 
           position="popper" 
           align="start"
           side="bottom"
