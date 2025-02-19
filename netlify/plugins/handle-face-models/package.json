@@ -1,0 +1,10 @@
+{
+  "name": "netlify-plugin-handle-face-models",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {}
+} 
