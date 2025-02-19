@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Carousel,
   CarouselContent,
@@ -7,74 +7,56 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { Pencil } from 'lucide-react';
+import type { Database } from '@/types/supabase';
 
-interface Profile {
-  id: string;
-  username: string;
-  full_name: string;
-  avatar_url: string;
-  bio: string;
-  city: string;
-  state: string;
-  website: string;
-  provider_since: string | null;
-  created_at: string;
-  updated_at: string;
-  role: string;
-  height: string | null;
-  body_type: string | null;
-  age: number | null;
-  rates: {
-    hourly?: number;
-    daily?: number;
-  } | null;
-  contact_info: {
-    email?: string;
-    phone?: string;
-    preferred?: string;
-  } | null;
-  ethnicity: string | null;
-  hair_color: string | null;
-  eye_color: string | null;
-  measurements: string | null;
-  languages: string[] | null;
-  availability: string | null;
-  services: string[] | null;
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type ProfilePhotoRow = Database['public']['Tables']['profile_photos']['Row'];
+
+interface ProfileWithPhotos extends Profile {
+  profile_photos: ProfilePhotoRow[];
 }
 
-const fetchProfile = async (username: string): Promise<Profile | null> => {
+const fetchProfile = async (username: string): Promise<ProfileWithPhotos | null> => {
   console.log('Fetching profile for username:', username);
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select(`
+      *,
+      profile_photos (*)
+    `)
     .ilike('username', username)
-    .maybeSingle();
+    .single();
 
   if (error) {
     console.error('Error fetching profile:', error);
     throw error;
   }
 
-  if (!data) return null;
-
-  // Transform the data to match our Profile interface
-  const profile: Profile = {
-    ...data,
-    rates: typeof data.rates === 'object' ? data.rates as { hourly?: number; daily?: number } : null,
-    contact_info: typeof data.contact_info === 'object' ? data.contact_info as { email?: string; phone?: string; preferred?: string } : null,
-    languages: Array.isArray(data.languages) ? data.languages : null,
-    services: Array.isArray(data.services) ? data.services : null,
-  };
-
-  console.log('Fetched profile:', profile);
-  return profile;
+  return data;
 };
 
 const ProfilePage = () => {
-  const { id } = useParams();
-  const decodedUsername = id ? decodeURIComponent(id) : '';
+  const { username } = useParams();
+  const navigate = useNavigate();
+  const decodedUsername = username ? decodeURIComponent(username) : '';
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+  });
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile', decodedUsername],
@@ -107,20 +89,15 @@ const ProfilePage = () => {
   }
 
   const getImageUrl = (avatarUrl: string | null) => {
-    if (!avatarUrl) return '/default-avatar.jpg'; // Add a default avatar image to your public folder
+    if (!avatarUrl) return '/default-avatar.jpg';
     if (avatarUrl.startsWith('http')) return avatarUrl;
-    // If it's just a path, construct the full URL
     return supabase.storage
       .from('avatars')
       .getPublicUrl(avatarUrl)
       .data.publicUrl;
   };
 
-  const images = [
-    "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    "https://images.unsplash.com/photo-1518770660439-4636190af475"
-  ];
+  const isOwnProfile = currentUser?.username === profile.username;
 
   return (
     <div className="container mx-auto px-4 py-8 mt-20">
@@ -137,17 +114,18 @@ const ProfilePage = () => {
                   />
                 </div>
               </CarouselItem>
-            ) : (
-              <CarouselItem>
+            ) : null}
+            {profile.profile_photos?.map((photo) => (
+              <CarouselItem key={photo.id}>
                 <div className="aspect-[3/4] relative">
                   <img
-                    src="/default-avatar.jpg"
-                    alt="Default profile"
+                    src={photo.url}
+                    alt={`${profile.full_name || profile.username}'s gallery photo`}
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
               </CarouselItem>
-            )}
+            ))}
           </CarouselContent>
           <CarouselPrevious className="left-2" />
           <CarouselNext className="right-2" />
@@ -155,17 +133,30 @@ const ProfilePage = () => {
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 neon-text">
-            {profile.full_name || profile.username}
-          </h1>
-          <p className="text-gray-400">
-            {profile.city && profile.state 
-              ? `${profile.city}, ${profile.state}`
-              : 'Location not specified'}
-          </p>
-          {profile.age && (
-            <p className="text-gray-400">Age: {profile.age}</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 neon-text">
+              {profile.full_name || profile.username}
+            </h1>
+            <p className="text-gray-400">
+              {profile.city && profile.state 
+                ? `${profile.city}, ${profile.state}`
+                : 'Location not specified'}
+            </p>
+            {profile.age && (
+              <p className="text-gray-400">Age: {profile.age}</p>
+            )}
+          </div>
+          {isOwnProfile && (
+            <Button
+              onClick={() => navigate(`/profile/edit`)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 neon-border"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit Profile
+            </Button>
           )}
         </div>
 
@@ -249,13 +240,6 @@ const ProfilePage = () => {
               <p className="text-gray-300">{profile.availability || 'Not specified'}</p>
             </div>
           </div>
-        </div>
-
-        <div className="glass-card p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4 neon-text">About Me</h2>
-          <p className="text-gray-300 leading-relaxed">
-            {profile.bio || 'No bio provided yet.'}
-          </p>
         </div>
       </div>
     </div>

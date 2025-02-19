@@ -5,6 +5,7 @@ import MembershipPage from './pages/MembershipPage';
 import ProfileEdit from './pages/ProfileEdit';
 import ProviderOnboarding from './pages/ProviderOnboarding';
 import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
 import AboutPage from './pages/AboutPage';
@@ -20,20 +21,20 @@ import Footer from './components/Footer';
 import AgeDisclaimer from './components/AgeDisclaimer';
 import FaceDetectionTest from './components/verification/FaceDetectionTest';
 
-function App() {
+const App = () => {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen relative z-10">
-        <AgeDisclaimer />
+      <div className="min-h-screen bg-background">
         <Header />
-        <main className="flex-grow mt-20 container mx-auto px-4">
+        <main className="min-h-[calc(100vh-4rem)]">
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/profile/:id" element={<ProfilePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<ProfileEdit />} />
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/provider-onboarding" element={<ProviderOnboarding />} />
-            <Route path="/login" element={<LoginPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -44,13 +45,14 @@ function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/featured" element={<FeaturedPage />} />
-            <Route path="/test-verification" element={<FaceDetectionTest />} />
+            <Route path="/face-detection-test" element={<FaceDetectionTest />} />
           </Routes>
         </main>
         <Footer />
+        <AgeDisclaimer />
       </div>
     </Router>
   );
-}
+};
 
 export default App;

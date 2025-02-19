@@ -10,15 +10,24 @@ import BasicInfoSection from '@/components/profile/BasicInfoSection';
 import PhysicalCharacteristicsSection from '@/components/profile/PhysicalCharacteristicsSection';
 import ServicesSection from '@/components/profile/ServicesSection';
 import AboutSection from '@/components/profile/AboutSection';
+import PhotoGallerySection from '@/components/profile/PhotoGallerySection';
 import { profileFormSchema } from '@/lib/validations/profile';
-import type { ProfileFormData } from '@/types/profile';
+import type { ProfileFormData, ProfilePhoto } from '@/types/profile';
+import type { Database } from '@/types/supabase';
 import { Loader2 } from 'lucide-react';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type ProfilePhotoRow = Database['public']['Tables']['profile_photos']['Row'];
 
 const ProfileEdit = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentProfile, setCurrentProfile] = useState<{
+    id: string;
+    photos: ProfilePhotoRow[];
+  } | null>(null);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -42,6 +51,8 @@ const ProfileEdit = () => {
       services: [],
       rates: {},
       contactInfo: {},
+      photos: [],
+      photoFiles: [],
     },
   });
 
@@ -57,13 +68,27 @@ const ProfileEdit = () => {
         return;
       }
 
-      const { data: profile, error } = await supabase
+      // Fetch profile data
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select()
         .eq('id', user.id)
         .single();
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Fetch profile photos
+      const { data: photos, error: photosError } = await supabase
+        .from('profile_photos')
+        .select()
+        .eq('profile_id', user.id);
+
+      if (photosError) throw photosError;
+
+      setCurrentProfile({
+        id: user.id,
+        photos: photos || [],
+      });
 
       form.reset({
         username: profile.username || '',
@@ -85,6 +110,8 @@ const ProfileEdit = () => {
         services: profile.services || [],
         rates: profile.rates || {},
         contactInfo: profile.contact_info || {},
+        photos: photos || [],
+        photoFiles: [],
       });
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -104,6 +131,7 @@ const ProfileEdit = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
+      // Handle avatar upload
       let avatarUrl = data.avatarUrl;
       if (data.avatarFile) {
         const fileExt = data.avatarFile.name.split('.').pop();
@@ -114,10 +142,49 @@ const ProfileEdit = () => {
           .upload(filePath, data.avatarFile);
 
         if (uploadError) throw uploadError;
-        
         avatarUrl = filePath;
       }
 
+      // Handle photo gallery uploads
+      const uploadedPhotos: ProfilePhotoRow[] = [];
+      if (data.photoFiles && data.photoFiles.length > 0) {
+        for (const file of data.photoFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${crypto.randomUUID()}.${fileExt}`;
+          const filePath = `${user.id}/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('gallery')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('gallery')
+            .getPublicUrl(filePath);
+
+          const photo: ProfilePhotoRow = {
+            id: crypto.randomUUID(),
+            url: publicUrl,
+            profile_id: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          uploadedPhotos.push(photo);
+        }
+      }
+
+      // Update profile photos in the database
+      if (uploadedPhotos.length > 0) {
+        const { error: photoError } = await supabase
+          .from('profile_photos')
+          .insert(uploadedPhotos);
+
+        if (photoError) throw photoError;
+      }
+
+      // Update profile data
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -144,6 +211,33 @@ const ProfileEdit = () => {
         .eq('id', user.id);
 
       if (updateError) throw updateError;
+
+      // Delete removed photos
+      if (currentProfile) {
+        const removedPhotos = currentProfile.photos.filter(
+          (photo) => !data.photos.find(p => p.id === photo.id)
+        );
+
+        if (removedPhotos.length > 0) {
+          // Delete from database
+          const { error: deleteError } = await supabase
+            .from('profile_photos')
+            .delete()
+            .in('id', removedPhotos.map(p => p.id));
+
+          if (deleteError) throw deleteError;
+
+          // Delete from storage
+          for (const photo of removedPhotos) {
+            const fileName = photo.url.split('/').pop();
+            if (fileName) {
+              await supabase.storage
+                .from('gallery')
+                .remove([`${user.id}/${fileName}`]);
+            }
+          }
+        }
+      }
 
       toast({
         title: "Success",
@@ -182,6 +276,7 @@ const ProfileEdit = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid gap-8">
               <BasicInfoSection form={form} />
+              <PhotoGallerySection form={form} />
               <PhysicalCharacteristicsSection form={form} />
               <ServicesSection form={form} />
               <AboutSection form={form} />
