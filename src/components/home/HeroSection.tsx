@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/assets/images/logo';
 
 const HeroSection = () => {
   return (
-    <div className="text-center mb-8">
-      <h2 className="text-3xl font-bold mb-4 neon-text">Discover Amazing Profiles</h2>
-      <p className="text-gray-300 mb-6">Browse our curated selection of profiles</p>
+    <div className="text-center py-16 mb-8">
+      <div className="max-w-[800px] mx-auto mb-8">
+        <Logo className="w-full h-auto hover:opacity-90 transition-opacity" />
+      </div>
       <Link to="/membership">
         <Button variant="default" className="neon-text">
           Become a Provider

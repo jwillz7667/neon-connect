@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { NavLogo } from '@/assets/images/NavLogo';
 
 const Header = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -52,29 +53,29 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo.svg" alt="NeonMeet" className="h-8" />
+        <div className="flex items-center justify-between h-24">
+          <Link to="/" className="flex items-center py-3">
+            <NavLogo className="h-16 w-auto hover:opacity-80 transition-opacity" />
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-gray-300 hover:text-white">
-              <Home className="w-5 h-5" />
+              <Home className="w-7 h-7" />
             </Link>
             <Link to="/search" className="text-gray-300 hover:text-white">
-              <Search className="w-5 h-5" />
+              <Search className="w-7 h-7" />
             </Link>
             <Link to="/featured" className="text-gray-300 hover:text-white">
-              <Crown className="w-5 h-5" />
+              <Crown className="w-7 h-7" />
             </Link>
             <Link to="/notifications" className="text-gray-300 hover:text-white">
-              <Bell className="w-5 h-5" />
+              <Bell className="w-7 h-7" />
             </Link>
             <button
               onClick={() => navigateToProfile()}
               className="text-gray-300 hover:text-white"
             >
-              <User className="w-5 h-5" />
+              <User className="w-7 h-7" />
             </button>
           </nav>
 
@@ -82,7 +83,7 @@ const Header = () => {
             className="md:hidden text-gray-300 hover:text-white"
             onClick={() => setIsOpen(!isOpen)}
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-8 h-8" />
           </button>
         </div>
       </div>
