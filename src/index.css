@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,11 +10,26 @@
   }
 
   body {
-    @apply bg-gradient-dark text-foreground min-h-screen;
+    @apply bg-black text-foreground min-h-screen relative overflow-x-hidden;
+  }
+
+  #root {
+    @apply min-h-screen relative;
   }
 }
 
 @layer components {
+  .app-background {
+    @apply fixed inset-0 bg-cover bg-center bg-no-repeat -z-10;
+    background-image: url('/images/brick-background.jpg');
+    opacity: 0.95;
+  }
+
+  body::before {
+    content: '';
+    @apply app-background;
+  }
+
   .glass-card {
     @apply backdrop-blur-lg bg-black/95 border border-primary/20 shadow-lg;
   }
@@ -27,19 +41,19 @@
   .neon-text {
     @apply text-primary drop-shadow-[0_0_8px_rgba(217,70,239,0.8)];
   }
+}
 
-  /* Navigation menu overrides */
-  [data-radix-popper-content-wrapper] {
-    @apply z-50 !important;
-  }
+/* Navigation menu overrides */
+[data-radix-popper-content-wrapper] {
+  @apply z-50 !important;
+}
 
-  .navigation-menu-content {
-    @apply animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 
-    data-[side=top]:slide-in-from-bottom-2 relative mt-2 !important;
-  }
+.navigation-menu-content {
+  @apply animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 
+  data-[side=top]:slide-in-from-bottom-2 relative mt-2 !important;
+}
 
-  /* State overrides for navigation triggers */
-  [data-state=open] {
-    @apply bg-transparent !important;
-  }
+/* State overrides for navigation triggers */
+[data-state=open] {
+  @apply bg-transparent !important;
 }

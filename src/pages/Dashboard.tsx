@@ -41,7 +41,7 @@ const Dashboard = () => {
 
       if (verificationRequest) {
         setVerificationStatus({
-          status: verificationRequest.status,
+          status: verificationRequest.status as 'pending' | 'approved' | 'rejected',
           submitted_at: verificationRequest.submitted_at
         });
       }
