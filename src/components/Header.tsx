@@ -78,8 +78,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <NavLogo className="h-8 w-8" />
-              <span className="ml-2 text-xl font-bold neon-text">NeonMeet</span>
+              <NavLogo className="h-10 w-auto" />
             </Link>
           </div>
 

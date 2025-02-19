@@ -20,6 +20,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import AgeDisclaimer from './components/AgeDisclaimer';
 import FaceDetectionTest from './components/verification/FaceDetectionTest';
+import BrowseLocationPage from './pages/BrowseLocationPage';
+import LocationPage from './pages/LocationPage';
 
 const App = () => {
   return (
@@ -45,6 +47,8 @@ const App = () => {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/featured" element={<FeaturedPage />} />
+            <Route path="/browse-location" element={<BrowseLocationPage />} />
+            <Route path="/location/:stateCode" element={<LocationPage />} />
             <Route path="/face-detection-test" element={<FaceDetectionTest />} />
           </Routes>
         </main>
