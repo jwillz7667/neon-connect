@@ -47,8 +47,7 @@
   package = "@netlify/plugin-nextjs"
 
 [[plugins]]
-  package = "netlify-plugin-handle-face-models"
-  source = "./netlify/plugins/handle-face-models"
+  package = "./netlify/plugins/handle-face-models"
 
 # Ensure face detection models are properly cached
 [[headers]]
