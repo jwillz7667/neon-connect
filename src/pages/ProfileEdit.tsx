@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import BasicInfoSection from '@/components/profile/BasicInfoSection';
 import PhysicalCharacteristicsSection from '@/components/profile/PhysicalCharacteristicsSection';
 import ServicesSection from '@/components/profile/ServicesSection';
 import AboutSection from '@/components/profile/AboutSection';
-import { ProfileFormData } from '@/types/profile';
+import { profileFormSchema } from '@/lib/validations/profile';
+import type { ProfileFormData } from '@/types/profile';
+import { Loader2 } from 'lucide-react';
 
 const ProfileEdit = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
       username: '',
       fullName: '',
@@ -27,7 +32,7 @@ const ProfileEdit = () => {
       avatarUrl: '',
       height: '',
       bodyType: '',
-      age: 0,
+      age: undefined,
       ethnicity: '',
       hairColor: '',
       eyeColor: '',
@@ -48,7 +53,7 @@ const ProfileEdit = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/membership');
+        navigate('/login');
         return;
       }
 
@@ -60,10 +65,6 @@ const ProfileEdit = () => {
 
       if (error) throw error;
 
-      // Parse JSON fields with type checking
-      const rates = typeof profile.rates === 'object' ? profile.rates : {};
-      const contactInfo = typeof profile.contact_info === 'object' ? profile.contact_info : {};
-
       form.reset({
         username: profile.username || '',
         fullName: profile.full_name || '',
@@ -74,7 +75,7 @@ const ProfileEdit = () => {
         avatarUrl: profile.avatar_url || '',
         height: profile.height || '',
         bodyType: profile.body_type || '',
-        age: profile.age || 0,
+        age: profile.age || undefined,
         ethnicity: profile.ethnicity || '',
         hairColor: profile.hair_color || '',
         eyeColor: profile.eye_color || '',
@@ -82,8 +83,8 @@ const ProfileEdit = () => {
         languages: profile.languages || [],
         availability: profile.availability || '',
         services: profile.services || [],
-        rates: rates as { hourly?: number; daily?: number },
-        contactInfo: contactInfo as { email?: string; phone?: string; preferred?: string },
+        rates: profile.rates || {},
+        contactInfo: profile.contact_info || {},
       });
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -98,7 +99,7 @@ const ProfileEdit = () => {
   };
 
   const onSubmit = async (data: ProfileFormData) => {
-    setIsLoading(true);
+    setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
@@ -114,12 +115,7 @@ const ProfileEdit = () => {
 
         if (uploadError) throw uploadError;
         
-        // Get the public URL for the uploaded file
-        const { data: publicUrlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-          
-        avatarUrl = publicUrlData.publicUrl;
+        avatarUrl = filePath;
       }
 
       const { error: updateError } = await supabase
@@ -163,29 +159,54 @@ const ProfileEdit = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 mt-20">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 neon-text">Edit Profile</h1>
-
+    <div className="container mx-auto px-4 py-8 mt-20">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 neon-text">Edit Profile</h1>
+        
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <BasicInfoSection form={form} />
-            <PhysicalCharacteristicsSection form={form} />
-            <ServicesSection form={form} />
-            <AboutSection form={form} />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="grid gap-8">
+              <BasicInfoSection form={form} />
+              <PhysicalCharacteristicsSection form={form} />
+              <ServicesSection form={form} />
+              <AboutSection form={form} />
+            </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? 'Saving...' : 'Save Profile'}
-            </Button>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>
