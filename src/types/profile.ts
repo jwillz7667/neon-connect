@@ -1,4 +1,3 @@
-
 export interface ProfileFormData {
   username: string;
   fullName: string;
@@ -30,6 +29,5 @@ export interface ProfileFormData {
 }
 
 export interface FormSectionProps {
-  form: any; // We'll use any here since the form type is complex
-  isLoading?: boolean;
+  form: UseFormReturn<ProfileFormData>;
 }

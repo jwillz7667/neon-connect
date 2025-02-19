@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,7 +62,7 @@ const ContactPage = () => {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium">Email</h3>
-              <p>support@neonconnect.com</p>
+              <p>support@neonmeet.com</p>
             </div>
             <div>
               <h3 className="font-medium">Business Hours</h3>

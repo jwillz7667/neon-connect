@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import ProfilePage from './pages/ProfilePage';
@@ -19,6 +18,7 @@ import FeaturedPage from './pages/FeaturedPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AgeDisclaimer from './components/AgeDisclaimer';
+import FaceDetectionTest from './components/verification/FaceDetectionTest';
 
 function App() {
   return (
@@ -44,6 +44,7 @@ function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/featured" element={<FeaturedPage />} />
+            <Route path="/test-verification" element={<FaceDetectionTest />} />
           </Routes>
         </main>
         <Footer />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const TermsPage = () => {
@@ -10,7 +9,7 @@ const TermsPage = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using NeonConnect, you agree to be bound by these Terms and Conditions, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.
+              By accessing and using NeonMeet.com, you agree to be bound by these Terms and Conditions, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.
             </p>
           </section>
 
@@ -42,9 +41,9 @@ const TermsPage = () => {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">5. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold mb-4">5. Liability</h2>
             <p>
-              NeonConnect shall not be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.
+              NeonMeet.com shall not be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.
             </p>
           </section>
         </div>

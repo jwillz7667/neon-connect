@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -114,7 +113,13 @@ const ProfileEdit = () => {
           .upload(filePath, data.avatarFile);
 
         if (uploadError) throw uploadError;
-        avatarUrl = filePath;
+        
+        // Get the public URL for the uploaded file
+        const { data: publicUrlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+          
+        avatarUrl = publicUrlData.publicUrl;
       }
 
       const { error: updateError } = await supabase

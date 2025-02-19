@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -107,6 +106,16 @@ const ProfilePage = () => {
     );
   }
 
+  const getImageUrl = (avatarUrl: string | null) => {
+    if (!avatarUrl) return '/default-avatar.jpg'; // Add a default avatar image to your public folder
+    if (avatarUrl.startsWith('http')) return avatarUrl;
+    // If it's just a path, construct the full URL
+    return supabase.storage
+      .from('avatars')
+      .getPublicUrl(avatarUrl)
+      .data.publicUrl;
+  };
+
   const images = [
     "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
     "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
@@ -118,17 +127,27 @@ const ProfilePage = () => {
       <div className="max-w-2xl mx-auto mb-8">
         <Carousel className="w-full">
           <CarouselContent>
-            {images.map((image, index) => (
-              <CarouselItem key={index}>
+            {profile.avatar_url ? (
+              <CarouselItem>
                 <div className="aspect-[3/4] relative">
                   <img
-                    src={profile.avatar_url || image}
-                    alt={`${profile.full_name || profile.username} photo ${index + 1}`}
+                    src={getImageUrl(profile.avatar_url)}
+                    alt={`${profile.full_name || profile.username}'s profile`}
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
               </CarouselItem>
-            ))}
+            ) : (
+              <CarouselItem>
+                <div className="aspect-[3/4] relative">
+                  <img
+                    src="/default-avatar.jpg"
+                    alt="Default profile"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                </div>
+              </CarouselItem>
+            )}
           </CarouselContent>
           <CarouselPrevious className="left-2" />
           <CarouselNext className="right-2" />

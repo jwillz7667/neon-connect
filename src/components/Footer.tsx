@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -33,7 +32,9 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-2 md:mt-6 text-center text-white/50 text-xs md:text-sm">
-          © 2024 Adult Connect. All rights reserved.
+          <p className="text-sm text-gray-400">
+            © 2024 NeonMeet.com. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

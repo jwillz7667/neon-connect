@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -10,7 +9,7 @@ import PersonalInfoSection from '@/components/onboarding/PersonalInfoSection';
 import AddressSection from '@/components/onboarding/AddressSection';
 import VerificationDocumentsSection from '@/components/onboarding/VerificationDocumentsSection';
 import BioSection from '@/components/onboarding/BioSection';
-import { validateAge, validateImageFile } from '@/services/verificationService';
+import { validateAge, validateVerificationPhotos, checkForDuplicateVerification } from '@/services/verificationService';
 
 interface VerificationFormData {
   fullName: string;
@@ -80,11 +79,23 @@ const ProviderOnboarding = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
-      // Validate age
-      if (!validateAge(data.dateOfBirth)) {
+      // Check for duplicate verification attempts
+      const hasDuplicate = await checkForDuplicateVerification(user.id);
+      if (hasDuplicate) {
         toast({
-          title: "Age Verification Failed",
-          description: "You must be 18 or older to become a provider.",
+          title: "Verification Restricted",
+          description: "You have a pending verification or must wait before submitting a new one.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate age
+      const ageValidation = await validateAge(data.dateOfBirth);
+      if (!ageValidation.isValid) {
+        toast({
+          title: ageValidation.error!.title,
+          description: ageValidation.error!.description,
           variant: "destructive",
         });
         return;
@@ -100,47 +111,64 @@ const ProviderOnboarding = () => {
         return;
       }
 
-      // Validate file types and sizes
-      const idValidation = validateImageFile(data.idDocument);
-      const selfieValidation = validateImageFile(data.selfieWithId);
-
-      if (!idValidation.isValid) {
+      // Validate verification photos
+      const photoValidation = await validateVerificationPhotos(data.idDocument, data.selfieWithId);
+      if (!photoValidation.isValid) {
         toast({
-          title: idValidation.error!.title,
-          description: idValidation.error!.description,
+          title: photoValidation.error!.title,
+          description: photoValidation.error!.description,
           variant: "destructive",
         });
         return;
       }
 
-      if (!selfieValidation.isValid) {
-        toast({
-          title: selfieValidation.error!.title,
-          description: selfieValidation.error!.description,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Upload ID document
+      // Upload ID document with encryption
       const idExt = data.idDocument.name.split('.').pop();
       const idPath = `${user.id}/id_${crypto.randomUUID()}.${idExt}`;
       const { error: idUploadError } = await supabase.storage
         .from('verification-documents')
-        .upload(idPath, data.idDocument);
+        .upload(idPath, data.idDocument, {
+          cacheControl: '0',
+          upsert: false,
+          contentType: data.idDocument.type,
+        });
 
       if (idUploadError) throw idUploadError;
 
-      // Upload selfie with ID
+      // Upload selfie with encryption
       const selfieExt = data.selfieWithId.name.split('.').pop();
       const selfiePath = `${user.id}/selfie_${crypto.randomUUID()}.${selfieExt}`;
       const { error: selfieUploadError } = await supabase.storage
         .from('verification-documents')
-        .upload(selfiePath, data.selfieWithId);
+        .upload(selfiePath, data.selfieWithId, {
+          cacheControl: '0',
+          upsert: false,
+          contentType: data.selfieWithId.type,
+        });
 
       if (selfieUploadError) throw selfieUploadError;
 
-      // Update profile with verification data
+      // Create verification request
+      const { error: verificationError } = await supabase
+        .from('verification_requests')
+        .insert({
+          user_id: user.id,
+          status: 'pending',
+          documents: {
+            id_document: idPath,
+            selfie_with_id: selfiePath,
+            date_of_birth: data.dateOfBirth,
+            address: data.address,
+            full_name: data.fullName,
+            submission_date: new Date().toISOString(),
+            ip_address: await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => data.ip),
+            user_agent: navigator.userAgent,
+          },
+        });
+
+      if (verificationError) throw verificationError;
+
+      // Update profile status
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -148,25 +176,24 @@ const ProviderOnboarding = () => {
           city: data.city,
           state: data.state,
           bio: data.bio,
-          verification_documents: {
-            id_document: idPath,
-            selfie_with_id: selfiePath,
-            date_of_birth: data.dateOfBirth,
-            address: data.address,
-            submission_date: new Date().toISOString(),
-          },
           verification_status: 'pending',
         })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
+      // Show success message
       toast({
-        title: "Verification submitted",
-        description: "Your verification documents have been submitted for review. Please allow 24-48 hours for processing.",
+        title: "Verification Submitted Successfully",
+        description: "Thank you for submitting your verification documents. Our team will review your information within 24-48 hours. You will receive an email notification once the review is complete.",
+        duration: 6000, // Show for 6 seconds
       });
 
-      navigate('/profile/edit');
+      // Wait for 2 seconds to let user read the message
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Redirect to dashboard or home page
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Error submitting verification:', error);
       toast({

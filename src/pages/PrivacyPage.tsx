@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const PrivacyPage = () => {
@@ -67,7 +66,7 @@ const PrivacyPage = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">6. Contact Us</h2>
             <p>
-              If you have any questions about this Privacy Policy, please contact us at privacy@neonconnect.com
+              If you have any questions about this Privacy Policy, please contact us at privacy@neonmeet.com
             </p>
           </section>
         </div>

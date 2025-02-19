@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from "@/components/ui/navigation-menu";
 import { Search, Crown, Menu, User, Bell, Home } from "lucide-react";
@@ -56,7 +55,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4 md:gap-8">
             <Link to="/" className="text-xl md:text-2xl font-bold neon-text whitespace-nowrap">
-              Adult Connect
+              NeonMeet.com
             </Link>
 
             {/* Desktop Navigation */}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
@@ -49,8 +48,16 @@ const LoginPage = () => {
                   colors: {
                     brand: 'rgb(147, 51, 234)',
                     brandAccent: 'rgb(126, 34, 206)',
+                    inputBackground: 'white',
+                    inputText: 'black',
+                    inputLabelText: 'black',
+                    inputPlaceholder: 'rgb(156, 163, 175)', // gray-400 for better contrast
                   },
                 },
+              },
+              className: {
+                input: 'bg-white text-black text-lg',
+                label: 'text-black',
               },
             }}
             providers={[]}
