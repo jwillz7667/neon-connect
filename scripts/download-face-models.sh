@@ -7,7 +7,7 @@ set -e
 mkdir -p public/models
 
 # Base URL for the model files
-BASE_URL="https://raw.githubusercontent.com/vladmandic/face-api/master/model"
+BASE_URL="https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights"
 
 # Download function with retries
 download_file() {
@@ -52,15 +52,15 @@ verify_file() {
 # List of files to download
 files=(
     "ssd_mobilenetv1_model-weights_manifest.json"
-    "ssd_mobilenetv1_model-shard1.bin"
-    "ssd_mobilenetv1_model-shard2.bin"
+    "ssd_mobilenetv1_model-shard1"
+    "ssd_mobilenetv1_model-shard2"
     "face_landmark_68_model-weights_manifest.json"
-    "face_landmark_68_model-shard1.bin"
+    "face_landmark_68_model-shard1"
     "face_recognition_model-weights_manifest.json"
-    "face_recognition_model-shard1.bin"
-    "face_recognition_model-shard2.bin"
+    "face_recognition_model-shard1"
+    "face_recognition_model-shard2"
     "age_gender_model-weights_manifest.json"
-    "age_gender_model-shard1.bin"
+    "age_gender_model-shard1"
 )
 
 echo "Starting face detection model download..."
