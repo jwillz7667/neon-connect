@@ -1,11 +1,10 @@
 [build]
-  command = "chmod +x scripts/download-face-models.sh && ./scripts/download-face-models.sh && npm run build"
+  command = "npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20.11.0"
   NPM_FLAGS = "--no-audit --no-fund"
-  GO_VERSION = "1.19"
 
 # Optimize build performance
 [build.processing]
