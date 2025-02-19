@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": true,
+    "lib": ["deno.window"],
+    "types": ["https://deno.land/x/stripe@v1.0.0/types.d.ts"]
+  },
+  "importMap": {
+    "imports": {
+      "stripe": "https://esm.sh/stripe@11.1.0?target=deno",
+      "http/server": "https://deno.land/std@0.168.0/http/server.ts"
+    }
+  },
+  "tasks": {
+    "serve": "deno run --allow-net --allow-env --watch index.ts"
+  }
+} 
