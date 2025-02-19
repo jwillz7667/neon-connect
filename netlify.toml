@@ -4,8 +4,25 @@
 
 [build.environment]
   NODE_VERSION = "20.11.0"
-  PYTHON_VERSION = "3.9"
-  RUBY_VERSION = "3.2.0"
+  NPM_FLAGS = "--no-audit --no-fund"
+
+# Optimize build performance
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
 
 # Ensure all routes are handled by the SPA
 [[redirects]]
