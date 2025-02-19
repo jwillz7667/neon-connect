@@ -44,9 +44,6 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[[plugins]]
   package = "./netlify/plugins/handle-face-models"
 
 # Ensure face detection models are properly cached
