@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +17,8 @@ const Index = () => {
     queryFn: async () => {
       try {
         console.log('Fetching profiles for state:', selectedState);
+        console.log('Using Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+        
         let query = supabase
           .from('profiles')
           .select('*');
@@ -30,21 +31,33 @@ const Index = () => {
         
         if (error) {
           console.error('Supabase error:', error);
+          console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
           toast({
             title: "Error loading profiles",
-            description: "Please try again later.",
+            description: error.message || "Please try again later.",
             variant: "destructive",
           });
           throw error;
         }
         
-        console.log('Successfully fetched profiles:', data);
+        if (!data || data.length === 0) {
+          console.log('No profiles found');
+          return [];
+        }
+        
+        console.log(`Successfully fetched ${data.length} profiles`);
         return data as Profile[];
       } catch (err) {
         console.error('Error in query function:', err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
         toast({
           title: "Error loading profiles",
-          description: "Please try again later.",
+          description: errorMessage,
           variant: "destructive",
         });
         throw err;
