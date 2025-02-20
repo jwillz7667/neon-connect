@@ -6,8 +6,8 @@ export const NavLogo: React.FC<{ className?: string }> = ({ className }) => {
       src="/images/neon-logo.png"
       alt="NeonMeet"
       className={className}
-      width={50}
-      height={50}
+      width={75}
+      height={75}
       style={{
         objectFit: 'contain'
       }}
