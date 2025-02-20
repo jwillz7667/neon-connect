@@ -6,6 +6,8 @@ import ProfileEdit from './pages/ProfileEdit';
 import ProviderOnboarding from './pages/ProviderOnboarding';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import UnderReviewPage from './pages/auth/UnderReviewPage';
+import AuthCallback from './pages/auth/AuthCallback';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
 import AboutPage from './pages/AboutPage';
@@ -33,6 +35,8 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/under-review" element={<UnderReviewPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/profile/:username" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<ProfileEdit />} />
             <Route path="/membership" element={<MembershipPage />} />

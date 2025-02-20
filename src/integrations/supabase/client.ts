@@ -4,8 +4,30 @@ import type { Database } from '@/types/supabase';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const siteUrl = import.meta.env.VITE_SITE_URL;
+
+// Debug environment variables
+console.log('Supabase URL:', supabaseUrl);
+console.log('Site URL:', siteUrl);
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+const redirectUrl = `${siteUrl}/auth/callback`;
+console.log('Redirect URL:', redirectUrl);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    redirectTo: redirectUrl,
+    storageKey: 'auth-storage',
+    storage: window.localStorage
+  }
+});

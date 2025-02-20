@@ -4,11 +4,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { validateAge, detectFaceInImage } from '@/services/verificationService';
+import { validateAge, validateVerificationPhotos } from '@/services/verificationService';
 import { Card } from '@/components/ui/card';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -24,8 +24,15 @@ const signupSchema = z.object({
     const date = new Date(val);
     return !isNaN(date.getTime());
   }, 'Please enter a valid date'),
-  selfiePhoto: z.any()
-    .refine((file) => file instanceof File, 'Please upload a selfie photo')
+  idDocument: z.any()
+    .refine((file) => file instanceof File, 'Please upload your ID document')
+    .refine((file) => file?.size <= 10 * 1024 * 1024, 'File size should be less than 10MB')
+    .refine(
+      (file) => ['image/jpeg', 'image/png', 'image/webp'].includes(file?.type),
+      'Only .jpg, .png, and .webp formats are supported'
+    ),
+  selfieWithId: z.any()
+    .refine((file) => file instanceof File, 'Please upload your verification selfie')
     .refine((file) => file?.size <= 10 * 1024 * 1024, 'File size should be less than 10MB')
     .refine(
       (file) => ['image/jpeg', 'image/png', 'image/webp'].includes(file?.type),
@@ -40,7 +47,9 @@ const SignupPage = () => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [idPreview, setIdPreview] = useState<string | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const currentDate = new Date().toISOString().split('T')[0];
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -49,50 +58,37 @@ const SignupPage = () => {
       password: '',
       fullName: '',
       dateOfBirth: '',
-      selfiePhoto: undefined,
+      idDocument: undefined,
+      selfieWithId: undefined,
     },
   });
 
-  const handleSelfieUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'id' | 'selfie') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       // Create preview
       const preview = URL.createObjectURL(file);
-      setSelfiePreview(preview);
-
-      // Validate face in image
-      const faceDetection = await detectFaceInImage(file);
-      if (!faceDetection.faceDetected) {
-        toast({
-          title: 'Face Detection Failed',
-          description: 'No face detected in the image. Please try again with a clearer photo.',
-          variant: 'destructive',
-        });
-        setSelfiePreview(null);
-        return;
+      if (type === 'id') {
+        setIdPreview(preview);
+        form.setValue('idDocument', file);
+      } else {
+        setSelfiePreview(preview);
+        form.setValue('selfieWithId', file);
       }
-
-      if (faceDetection.multipleFaces) {
-        toast({
-          title: 'Multiple Faces Detected',
-          description: 'Please upload a photo with only your face.',
-          variant: 'destructive',
-        });
-        setSelfiePreview(null);
-        return;
-      }
-
-      form.setValue('selfiePhoto', file);
     } catch (error) {
-      console.error('Error processing selfie:', error);
+      console.error('Error processing image:', error);
       toast({
         title: 'Error Processing Photo',
         description: 'There was an error processing your photo. Please try again.',
         variant: 'destructive',
       });
-      setSelfiePreview(null);
+      if (type === 'id') {
+        setIdPreview(null);
+      } else {
+        setSelfiePreview(null);
+      }
     }
   };
 
@@ -105,6 +101,17 @@ const SignupPage = () => {
         toast({
           title: ageValidation.error!.title,
           description: ageValidation.error!.description,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Validate verification photos
+      const photoValidation = await validateVerificationPhotos(data.idDocument, data.selfieWithId);
+      if (!photoValidation.isValid) {
+        toast({
+          title: photoValidation.error!.title,
+          description: photoValidation.error!.description,
           variant: 'destructive',
         });
         return;
@@ -123,30 +130,46 @@ const SignupPage = () => {
       });
 
       if (authError) throw authError;
-
       if (!authData.user) throw new Error('No user data returned');
 
-      // Upload selfie photo
-      const selfieExt = data.selfiePhoto.name.split('.').pop();
-      const selfiePath = `${authData.user.id}/signup_selfie_${crypto.randomUUID()}.${selfieExt}`;
+      // Upload ID document
+      const idExt = data.idDocument.name.split('.').pop();
+      const idPath = `${authData.user.id}/id_${crypto.randomUUID()}.${idExt}`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('verification-photos')
-        .upload(selfiePath, data.selfiePhoto, {
+      const { error: idUploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(idPath, data.idDocument, {
           cacheControl: '0',
           upsert: false,
         });
 
-      if (uploadError) throw uploadError;
+      if (idUploadError) throw idUploadError;
 
-      // Create profile
+      // Upload selfie with ID
+      const selfieExt = data.selfieWithId.name.split('.').pop();
+      const selfiePath = `${authData.user.id}/selfie_${crypto.randomUUID()}.${selfieExt}`;
+      
+      const { error: selfieUploadError } = await supabase.storage
+        .from('verification-documents')
+        .upload(selfiePath, data.selfieWithId, {
+          cacheControl: '0',
+          upsert: false,
+        });
+
+      if (selfieUploadError) throw selfieUploadError;
+
+      // Create profile and verification request
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: authData.user.id,
           full_name: data.fullName,
-          signup_selfie: selfiePath,
           date_of_birth: data.dateOfBirth,
+          verification_status: 'pending',
+          verification_documents: {
+            id_document: idPath,
+            selfie_with_id: selfiePath,
+          },
         });
 
       if (profileError) throw profileError;
@@ -156,8 +179,8 @@ const SignupPage = () => {
         description: 'Please check your email to verify your account.',
       });
 
-      // Redirect to login
-      navigate('/login');
+      // Redirect to under review page
+      navigate('/under-review');
     } catch (error) {
       console.error('Signup error:', error);
       toast({
@@ -205,7 +228,7 @@ const SignupPage = () => {
               Step {currentStep} of 3: {' '}
               {currentStep === 1 ? 'Account Details' :
                currentStep === 2 ? 'Personal Information' :
-               'Face Verification'}
+               'Identity Verification'}
             </p>
           </div>
 
@@ -274,10 +297,43 @@ const SignupPage = () => {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <FormField
                     control={form.control}
-                    name="selfiePhoto"
+                    name="idDocument"
+                    render={({ field: { value, onChange, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>Government-Issued ID</FormLabel>
+                        <FormControl>
+                          <div className="space-y-4">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleImageUpload(e, 'id')}
+                              {...field}
+                            />
+                            {idPreview && (
+                              <div className="mt-4">
+                                <img
+                                  src={idPreview}
+                                  alt="ID preview"
+                                  className="max-w-full h-auto rounded-lg"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Upload a clear photo of your government-issued ID
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="selfieWithId"
                     render={({ field: { value, onChange, ...field } }) => (
                       <FormItem>
                         <FormLabel>Verification Selfie</FormLabel>
@@ -286,9 +342,7 @@ const SignupPage = () => {
                             <Input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => {
-                                handleSelfieUpload(e);
-                              }}
+                              onChange={(e) => handleImageUpload(e, 'selfie')}
                               {...field}
                             />
                             {selfiePreview && (
@@ -302,6 +356,14 @@ const SignupPage = () => {
                             )}
                           </div>
                         </FormControl>
+                        <FormDescription>
+                          Upload a selfie of yourself holding:
+                          <ul className="list-disc pl-6 mt-2 space-y-1">
+                            <li>Your government-issued ID (visible in the photo)</li>
+                            <li>A paper with today's date ({currentDate})</li>
+                            <li>Your full name written on the paper</li>
+                          </ul>
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
