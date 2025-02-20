@@ -9,8 +9,7 @@ export const NavLogo: React.FC<{ className?: string }> = ({ className }) => {
       width={50}
       height={50}
       style={{
-        objectFit: 'contain',
-        filter: 'drop-shadow(0 0 12px rgba(56, 189, 248, 0.6))'
+        objectFit: 'contain'
       }}
     />
   );
