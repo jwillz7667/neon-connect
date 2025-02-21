@@ -1,13 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import ProfileGrid from '@/components/home/ProfileGrid';
-import type { Database } from '@/integrations/supabase/types';
+import { supabase } from '@/lib/db-helpers';
+import { ProfileGrid } from '@/components/profile/ProfileGrid';
+import type { Database } from '@/types/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const FeaturedPage = () => {
-  const { data: profiles, isLoading, error } = useQuery({
+  const { data: profiles, isLoading } = useQuery({
     queryKey: ['featured-profiles'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,8 +28,7 @@ const FeaturedPage = () => {
       <div className="max-w-6xl mx-auto">
         <ProfileGrid 
           profiles={profiles || []} 
-          isLoading={isLoading} 
-          error={error as Error | null} 
+          loading={isLoading}
         />
       </div>
     </div>
