@@ -1,249 +1,235 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
-import { Pencil } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/db-helpers';
 import type { Database } from '@/types/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-type ProfilePhotoRow = Database['public']['Tables']['profile_photos']['Row'];
+type UserRole = Database['public']['Enums']['user_role'];
+type VerificationStatus = Database['public']['Enums']['verification_status'];
 
-interface ProfileWithPhotos extends Profile {
-  profile_photos: ProfilePhotoRow[];
-}
-
-const fetchProfile = async (username: string): Promise<ProfileWithPhotos | null> => {
-  console.log('Fetching profile for username:', username);
-  const { data, error } = await supabase
-    .from('profiles')
-    .select(`
-      *,
-      profile_photos (*)
-    `)
-    .ilike('username', username)
-    .single();
-
-  if (error) {
-    console.error('Error fetching profile:', error);
-    throw error;
-  }
-
-  return data;
-};
-
-const ProfilePage = () => {
-  const { username } = useParams();
+export default function ProfilePage() {
   const navigate = useNavigate();
-  const decodedUsername = username ? decodeURIComponent(username) : '';
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      const { data } = await supabase
+  useEffect(() => {
+    async function getProfile() {
+      // Get current authenticated user
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user) {
+        navigate('/login');
+        return;
+      }
+      
+      setCurrentUserId(authData.user.id);
+
+      // Fetch profile data
+      const { data: profileData, error } = await supabase
         .from('profiles')
-        .select('username')
-        .eq('id', user.id)
+        .select('*')
+        .eq('id', authData.user.id)
         .single();
-      return data;
-    },
-  });
 
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['profile', decodedUsername],
-    queryFn: () => fetchProfile(decodedUsername),
-    enabled: !!decodedUsername,
-  });
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
 
-  if (isLoading) {
+      setProfile(profileData);
+      setLoading(false);
+    }
+
+    getProfile();
+  }, [navigate]);
+
+  if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="text-center">Loading profile...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="text-center text-red-500">Error loading profile. Please try again later.</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="text-center">Profile not found</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">Profile not found</h2>
+          <p className="mt-2 text-gray-600">Please try again later</p>
+        </div>
       </div>
     );
   }
 
-  const getImageUrl = (avatarUrl: string | null) => {
-    if (!avatarUrl) return '/default-avatar.jpg';
-    if (avatarUrl.startsWith('http')) return avatarUrl;
-    return supabase.storage
-      .from('avatars')
-      .getPublicUrl(avatarUrl)
-      .data.publicUrl;
-  };
-
-  const isOwnProfile = currentUser?.username === profile.username;
-
   return (
-    <div className="container mx-auto px-4 py-8 mt-20">
-      <div className="max-w-2xl mx-auto mb-8">
-        <Carousel className="w-full">
-          <CarouselContent>
-            {profile.avatar_url ? (
-              <CarouselItem>
-                <div className="aspect-[3/4] relative">
-                  <img
-                    src={getImageUrl(profile.avatar_url)}
-                    alt={`${profile.full_name || profile.username}'s profile`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-              </CarouselItem>
-            ) : null}
-            {profile.profile_photos?.map((photo) => (
-              <CarouselItem key={photo.id}>
-                <div className="aspect-[3/4] relative">
-                  <img
-                    src={photo.url}
-                    alt={`${profile.full_name || profile.username}'s gallery photo`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
-      </div>
-
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 neon-text">
-              {profile.full_name || profile.username}
-            </h1>
-            <p className="text-gray-400">
-              {profile.city && profile.state 
-                ? `${profile.city}, ${profile.state}`
-                : 'Location not specified'}
-            </p>
-            {profile.age && (
-              <p className="text-gray-400">Age: {profile.age}</p>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Profile Information</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Personal details and preferences</p>
+            </div>
+            {currentUserId === profile?.id && (
+              <button
+                onClick={() => navigate('/profile/edit')}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Edit Profile
+              </button>
             )}
           </div>
-          {isOwnProfile && (
-            <Button
-              onClick={() => navigate(`/profile/edit`)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 neon-border"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit Profile
-            </Button>
-          )}
-        </div>
 
-        <div className="glass-card p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-semibold mb-4 neon-text">Stats</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-gray-400">Height</p>
-              <p className="font-medium">{profile.height || 'Not specified'}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Body Type</p>
-              <p className="font-medium">{profile.body_type || 'Not specified'}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Ethnicity</p>
-              <p className="font-medium">{profile.ethnicity || 'Not specified'}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Hair Color</p>
-              <p className="font-medium">{profile.hair_color || 'Not specified'}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Eye Color</p>
-              <p className="font-medium">{profile.eye_color || 'Not specified'}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Measurements</p>
-              <p className="font-medium">{profile.measurements || 'Not specified'}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-semibold mb-4 neon-text">Languages & Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Languages</h3>
-              {profile.languages && profile.languages.length > 0 ? (
-                <ul className="list-disc list-inside">
-                  {profile.languages.map((lang, index) => (
-                    <li key={index} className="text-gray-300">{lang}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400">No languages specified</p>
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-medium mb-2">Services</h3>
-              {profile.services && profile.services.length > 0 ? (
-                <ul className="list-disc list-inside">
-                  {profile.services.map((service, index) => (
-                    <li key={index} className="text-gray-300">{service}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400">No services specified</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-semibold mb-4 neon-text">Rates & Availability</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {profile.rates && Object.keys(profile.rates).length > 0 && (
-              <div>
-                <h3 className="text-lg font-medium mb-2">Rates</h3>
-                <div className="space-y-2">
-                  {Object.entries(profile.rates).map(([duration, rate]) => (
-                    <p key={duration} className="text-gray-300">
-                      {duration.charAt(0).toUpperCase() + duration.slice(1)}: ${rate}
-                    </p>
-                  ))}
-                </div>
+          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+              {/* Basic Information */}
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Username</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.username || 'Not set'}</dd>
               </div>
-            )}
-            <div>
-              <h3 className="text-lg font-medium mb-2">Availability</h3>
-              <p className="text-gray-300">{profile.availability || 'Not specified'}</p>
-            </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Full Name</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.full_name || 'Not set'}</dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Email</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.email || 'Not set'}</dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Bio</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.bio || 'No bio provided'}</dd>
+              </div>
+
+              {/* Location Information */}
+              <div>
+                <dt className="text-sm font-medium text-gray-500">City</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.city || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">State</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.state || 'Not set'}</dd>
+              </div>
+
+              {/* Physical Characteristics */}
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Height</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.height || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Body Type</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.body_type || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Age</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.age || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Ethnicity</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.ethnicity || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Hair Color</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.hair_color || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Eye Color</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.eye_color || 'Not set'}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Measurements</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.measurements || 'Not set'}</dd>
+              </div>
+
+              {/* Professional Information */}
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Languages</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.languages ? profile.languages.join(', ') : 'Not set'}
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Availability</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.availability || 'Not set'}</dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Services</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.services ? profile.services.join(', ') : 'Not set'}
+                </dd>
+              </div>
+
+              {/* Contact & Rates */}
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Website</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.website ? (
+                    <a href={profile.website} className="text-indigo-600 hover:text-indigo-500" target="_blank" rel="noopener noreferrer">
+                      {profile.website}
+                    </a>
+                  ) : 'Not set'}
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Contact Information</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.contact_info ? (
+                    <pre className="whitespace-pre-wrap">{JSON.stringify(profile.contact_info, null, 2)}</pre>
+                  ) : 'Not set'}
+                </dd>
+              </div>
+
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Rates</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.rates ? (
+                    <pre className="whitespace-pre-wrap">{JSON.stringify(profile.rates, null, 2)}</pre>
+                  ) : 'Not set'}
+                </dd>
+              </div>
+
+              {/* Status Information */}
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Role</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.role}</dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Verification Status</dt>
+                <dd className="mt-1 text-sm text-gray-900">{profile.verification_status}</dd>
+              </div>
+
+              {/* Timestamps */}
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Provider Since</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.provider_since ? new Date(profile.provider_since).toLocaleDateString() : 'Not set'}
+                </dd>
+              </div>
+
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Not set'}
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default ProfilePage;
+}

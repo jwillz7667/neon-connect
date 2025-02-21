@@ -4,9 +4,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+
+type VerificationRequest = Database['public']['Tables']['verification_requests']['Row'];
+type VerificationResponse = VerificationRequest[] | null;
 
 interface VerificationStatus {
-  status: 'pending' | 'approved' | 'rejected' | null;
+  status: VerificationRequest['status'] | null;
   submitted_at: string | null;
 }
 
@@ -31,18 +35,26 @@ const Dashboard = () => {
       }
 
       // Get the latest verification request
-      const { data: verificationRequest } = await supabase
+      const { data, error } = await supabase
         .from('verification_requests')
         .select('status, submitted_at')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id as Database['public']['Tables']['verification_requests']['Row']['user_id'])
         .order('submitted_at', { ascending: false })
         .limit(1)
-        .single();
+        .single() as { 
+          data: Pick<VerificationRequest, 'status' | 'submitted_at'> | null; 
+          error: any; 
+        };
 
-      if (verificationRequest) {
+      if (error) {
+        console.error('Error fetching verification status:', error);
+        return;
+      }
+
+      if (data) {
         setVerificationStatus({
-          status: verificationRequest.status as 'pending' | 'approved' | 'rejected',
-          submitted_at: verificationRequest.submitted_at
+          status: data.status,
+          submitted_at: data.submitted_at
         });
       }
     } catch (error) {

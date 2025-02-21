@@ -1,20 +1,24 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LocationSelector from '../LocationSelector';
-import ProfileGrid from './ProfileGrid';
-import { Database } from '@/integrations/supabase/types';
+import { ProfileGrid } from '../profile/ProfileGrid';
+import type { Database } from '@/types/supabase';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface ProfileTabsProps {
   profiles: Profile[];
-  isLoading: boolean;
-  error: Error | null;
-  selectedState: string;
+  loading: boolean;
+  selectedState: string | null;
   onStateChange: (state: string) => void;
 }
 
-const ProfileTabs = ({ profiles, isLoading, error, selectedState, onStateChange }: ProfileTabsProps) => {
+export function ProfileTabs({ 
+  profiles, 
+  loading, 
+  selectedState, 
+  onStateChange 
+}: ProfileTabsProps) {
   return (
     <Tabs defaultValue="all" className="mb-8">
       <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
@@ -22,19 +26,29 @@ const ProfileTabs = ({ profiles, isLoading, error, selectedState, onStateChange 
         <TabsTrigger value="location">By Location</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="all">
-        <ProfileGrid profiles={profiles} isLoading={isLoading} error={error} />
+      <TabsContent value="all" className="mt-6">
+        <ProfileGrid 
+          profiles={profiles} 
+          loading={loading} 
+        />
       </TabsContent>
       
-      <TabsContent value="location">
-        <LocationSelector
-          selectedState={selectedState}
-          onStateChange={onStateChange}
-        />
-        <ProfileGrid profiles={profiles} isLoading={isLoading} error={error} />
+      <TabsContent value="location" className="mt-6">
+        <div className="space-y-6">
+          <LocationSelector
+            selectedState={selectedState || ''}
+            onStateChange={onStateChange}
+          />
+          <ProfileGrid 
+            profiles={profiles.filter(profile => 
+              selectedState ? profile.state === selectedState : true
+            )}
+            loading={loading}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );
-};
+}
 
 export default ProfileTabs;

@@ -1,312 +1,318 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import BasicInfoSection from '@/components/profile/BasicInfoSection';
-import PhysicalCharacteristicsSection from '@/components/profile/PhysicalCharacteristicsSection';
-import ServicesSection from '@/components/profile/ServicesSection';
-import AboutSection from '@/components/profile/AboutSection';
-import PhotoGallerySection from '@/components/profile/PhotoGallerySection';
-import { profileFormSchema } from '@/lib/validations/profile';
-import type { ProfileFormData, ProfilePhoto } from '@/types/profile';
+import { supabase } from '@/lib/db-helpers';
 import type { Database } from '@/types/supabase';
-import { Loader2 } from 'lucide-react';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
-type ProfilePhotoRow = Database['public']['Tables']['profile_photos']['Row'];
+type Profile = Database['public']['Tables']['profiles']['Update'];
+type UserRole = Database['public']['Enums']['user_role'];
+type VerificationStatus = Database['public']['Enums']['verification_status'];
 
-const ProfileEdit = () => {
+export default function ProfileEdit() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [currentProfile, setCurrentProfile] = useState<{
-    id: string;
-    photos: ProfilePhotoRow[];
-  } | null>(null);
-
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      username: '',
-      fullName: '',
-      bio: '',
-      city: '',
-      state: '',
-      website: '',
-      avatarUrl: '',
-      height: '',
-      bodyType: '',
-      age: undefined,
-      ethnicity: '',
-      hairColor: '',
-      eyeColor: '',
-      measurements: '',
-      languages: [],
-      availability: '',
-      services: [],
-      rates: {},
-      contactInfo: {},
-      photos: [],
-      photoFiles: [],
-    },
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile>({
+    username: null,
+    full_name: null,
+    avatar_url: null,
+    bio: null,
+    email: null,
+    city: null,
+    state: null,
+    website: null,
+    role: 'user' as UserRole,
+    verification_status: 'pending' as VerificationStatus,
+    age: null,
+    availability: null,
+    birthdate: null,
+    body_type: null,
+    contact_info: null,
+    ethnicity: null,
+    eye_color: null,
+    hair_color: null,
+    height: null,
+    languages: null,
+    measurements: null,
+    provider_since: null,
+    rates: null,
+    services: null,
+    updated_at: new Date().toISOString()
   });
 
   useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
+    async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         navigate('/login');
         return;
       }
 
-      // Fetch profile data
-      const { data: profile, error: profileError } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select()
+        .select('*')
         .eq('id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
 
-      // Fetch profile photos
-      const { data: photos, error: photosError } = await supabase
-        .from('profile_photos')
-        .select()
-        .eq('profile_id', user.id);
-
-      if (photosError) throw photosError;
-
-      setCurrentProfile({
-        id: user.id,
-        photos: photos || [],
-      });
-
-      form.reset({
-        username: profile.username || '',
-        fullName: profile.full_name || '',
-        bio: profile.bio || '',
-        city: profile.city || '',
-        state: profile.state || '',
-        website: profile.website || '',
-        avatarUrl: profile.avatar_url || '',
-        height: profile.height || '',
-        bodyType: profile.body_type || '',
-        age: profile.age || undefined,
-        ethnicity: profile.ethnicity || '',
-        hairColor: profile.hair_color || '',
-        eyeColor: profile.eye_color || '',
-        measurements: profile.measurements || '',
-        languages: profile.languages || [],
-        availability: profile.availability || '',
-        services: profile.services || [],
-        rates: profile.rates || {},
-        contactInfo: profile.contact_info || {},
-        photos: photos || [],
-        photoFiles: [],
-      });
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load profile data.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      if (data) {
+        setProfile(data);
+      }
+      setLoading(false);
     }
-  };
 
-  const onSubmit = async (data: ProfileFormData) => {
-    setIsSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+    getProfile();
+  }, [navigate]);
 
-      // Handle avatar upload
-      let avatarUrl = data.avatarUrl;
-      if (data.avatarFile) {
-        const fileExt = data.avatarFile.name.split('.').pop();
-        const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, data.avatarFile);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
 
-        if (uploadError) throw uploadError;
-        avatarUrl = filePath;
-      }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
 
-      // Handle photo gallery uploads
-      const uploadedPhotos: ProfilePhotoRow[] = [];
-      if (data.photoFiles && data.photoFiles.length > 0) {
-        for (const file of data.photoFiles) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${crypto.randomUUID()}.${fileExt}`;
-          const filePath = `${user.id}/${fileName}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('gallery')
-            .upload(filePath, file);
+    const { error } = await supabase
+      .from('profiles')
+      .update(profile)
+      .eq('id', user.id);
 
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('gallery')
-            .getPublicUrl(filePath);
-
-          const photo: ProfilePhotoRow = {
-            id: crypto.randomUUID(),
-            url: publicUrl,
-            profile_id: user.id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-
-          uploadedPhotos.push(photo);
-        }
-      }
-
-      // Update profile photos in the database
-      if (uploadedPhotos.length > 0) {
-        const { error: photoError } = await supabase
-          .from('profile_photos')
-          .insert(uploadedPhotos);
-
-        if (photoError) throw photoError;
-      }
-
-      // Update profile data
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          username: data.username,
-          full_name: data.fullName,
-          bio: data.bio,
-          city: data.city,
-          state: data.state,
-          website: data.website,
-          avatar_url: avatarUrl,
-          height: data.height,
-          body_type: data.bodyType,
-          age: data.age,
-          ethnicity: data.ethnicity,
-          hair_color: data.hairColor,
-          eye_color: data.eyeColor,
-          measurements: data.measurements,
-          languages: data.languages,
-          availability: data.availability,
-          services: data.services,
-          rates: data.rates,
-          contact_info: data.contactInfo,
-        })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-
-      // Delete removed photos
-      if (currentProfile) {
-        const removedPhotos = currentProfile.photos.filter(
-          (photo) => !data.photos.find(p => p.id === photo.id)
-        );
-
-        if (removedPhotos.length > 0) {
-          // Delete from database
-          const { error: deleteError } = await supabase
-            .from('profile_photos')
-            .delete()
-            .in('id', removedPhotos.map(p => p.id));
-
-          if (deleteError) throw deleteError;
-
-          // Delete from storage
-          for (const photo of removedPhotos) {
-            const fileName = photo.url.split('/').pop();
-            if (fileName) {
-              await supabase.storage
-                .from('gallery')
-                .remove([`${user.id}/${fileName}`]);
-            }
-          }
-        }
-      }
-
-      toast({
-        title: "Success",
-        description: "Your profile has been updated.",
-      });
-
-      navigate(`/profile/${data.username}`);
-    } catch (error) {
+    if (error) {
       console.error('Error updating profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+      setLoading(false);
+      return;
     }
+
+    navigate('/profile');
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8 mt-20">
-        <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-20">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 neon-text">Edit Profile</h1>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid gap-8">
-              <BasicInfoSection form={form} />
-              <PhotoGallerySection form={form} />
-              <PhysicalCharacteristicsSection form={form} />
-              <ServicesSection form={form} />
-              <AboutSection form={form} />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200">
+          <div className="space-y-8 divide-y divide-gray-200">
+            <div>
+              <h3 className="text-lg font-medium leading-6 text-gray-900">Profile Information</h3>
+              <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div className="sm:col-span-3">
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
+                  <input
+                    type="text"
+                    name="username"
+                    id="username"
+                    value={profile.username || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
 
-            <div className="flex justify-end space-x-4">
-              <Button
+                <div className="sm:col-span-3">
+                  <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    id="full_name"
+                    value={profile.full_name || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={profile.email || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-6">
+                  <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Bio</label>
+                  <textarea
+                    name="bio"
+                    id="bio"
+                    value={profile.bio || ''}
+                    onChange={handleChange}
+                    rows={3}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    id="city"
+                    value={profile.city || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    id="state"
+                    value={profile.state || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label htmlFor="website" className="block text-sm font-medium text-gray-700">Website</label>
+                  <input
+                    type="url"
+                    name="website"
+                    id="website"
+                    value={profile.website || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700">Birthdate</label>
+                  <input
+                    type="date"
+                    name="birthdate"
+                    id="birthdate"
+                    value={profile.birthdate || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="height" className="block text-sm font-medium text-gray-700">Height</label>
+                  <input
+                    type="text"
+                    name="height"
+                    id="height"
+                    value={profile.height || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="body_type" className="block text-sm font-medium text-gray-700">Body Type</label>
+                  <input
+                    type="text"
+                    name="body_type"
+                    id="body_type"
+                    value={profile.body_type || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="ethnicity" className="block text-sm font-medium text-gray-700">Ethnicity</label>
+                  <input
+                    type="text"
+                    name="ethnicity"
+                    id="ethnicity"
+                    value={profile.ethnicity || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="hair_color" className="block text-sm font-medium text-gray-700">Hair Color</label>
+                  <input
+                    type="text"
+                    name="hair_color"
+                    id="hair_color"
+                    value={profile.hair_color || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="eye_color" className="block text-sm font-medium text-gray-700">Eye Color</label>
+                  <input
+                    type="text"
+                    name="eye_color"
+                    id="eye_color"
+                    value={profile.eye_color || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="measurements" className="block text-sm font-medium text-gray-700">Measurements</label>
+                  <input
+                    type="text"
+                    name="measurements"
+                    id="measurements"
+                    value={profile.measurements || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-6">
+                  <label htmlFor="availability" className="block text-sm font-medium text-gray-700">Availability</label>
+                  <input
+                    type="text"
+                    name="availability"
+                    id="availability"
+                    value={profile.availability || ''}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-5">
+            <div className="flex justify-end">
+              <button
                 type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                disabled={isSaving}
+                onClick={() => navigate('/profile')}
+                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Cancel
-              </Button>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Save
+              </button>
             </div>
-          </form>
-        </Form>
+          </div>
+        </form>
       </div>
     </div>
   );
-};
-
-export default ProfileEdit;
+}

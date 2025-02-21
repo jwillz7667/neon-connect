@@ -1,4 +1,5 @@
 import { Json } from './base';
+import type { Database } from '@/types/supabase';
 
 export interface CommentTable {
   Row: {
@@ -55,11 +56,23 @@ export interface ProfileTable {
     provider_since: string | null
     created_at: string
     updated_at: string
-    role: string | null
-    verification_status: string | null
+    role: 'user' | 'provider' | 'admin'
+    verification_status: 'pending' | 'approved' | 'rejected' | 'expired'
     verification_documents: Json | null
     birthdate: string | null
     verified_at: string | null
+    // Provider specific fields
+    featured_until: string | null
+    featured_priority: number | null
+    provider_category_ids: string[] | null
+    provider_location_ids: string[] | null
+    provider_rating: number | null
+    provider_review_count: number | null
+    provider_status: 'available' | 'busy' | 'away' | 'offline'
+    provider_settings: Json | null
+    last_active_at: string | null
+    subscription_tier: string | null
+    subscription_status: string | null
   }
   Insert: {
     id: string
@@ -74,11 +87,23 @@ export interface ProfileTable {
     provider_since?: string | null
     created_at?: string
     updated_at?: string
-    role?: string | null
-    verification_status?: string | null
+    role?: 'user' | 'provider' | 'admin'
+    verification_status?: 'pending' | 'approved' | 'rejected' | 'expired'
     verification_documents?: Json | null
     birthdate?: string | null
     verified_at?: string | null
+    // Provider specific fields
+    featured_until?: string | null
+    featured_priority?: number | null
+    provider_category_ids?: string[] | null
+    provider_location_ids?: string[] | null
+    provider_rating?: number | null
+    provider_review_count?: number | null
+    provider_status?: 'available' | 'busy' | 'away' | 'offline'
+    provider_settings?: Json | null
+    last_active_at?: string | null
+    subscription_tier?: string | null
+    subscription_status?: string | null
   }
   Update: {
     id?: string
@@ -93,13 +118,32 @@ export interface ProfileTable {
     provider_since?: string | null
     created_at?: string
     updated_at?: string
-    role?: string | null
-    verification_status?: string | null
+    role?: 'user' | 'provider' | 'admin'
+    verification_status?: 'pending' | 'approved' | 'rejected' | 'expired'
     verification_documents?: Json | null
     birthdate?: string | null
     verified_at?: string | null
+    // Provider specific fields
+    featured_until?: string | null
+    featured_priority?: number | null
+    provider_category_ids?: string[] | null
+    provider_location_ids?: string[] | null
+    provider_rating?: number | null
+    provider_review_count?: number | null
+    provider_status?: 'available' | 'busy' | 'away' | 'offline'
+    provider_settings?: Json | null
+    last_active_at?: string | null
+    subscription_tier?: string | null
+    subscription_status?: string | null
   }
-  Relationships: []
+  Relationships: [
+    {
+      foreignKeyName: "profiles_subscription_tier_fkey"
+      columns: ["subscription_tier"]
+      referencedRelation: "subscription_tiers"
+      referencedColumns: ["id"]
+    }
+  ]
 }
 
 export interface VerificationRequestTable {
@@ -149,36 +193,36 @@ export interface VerificationRequestTable {
 export interface SubscriptionTable {
   Row: {
     id: string
-    user_id: string | null
-    tier: string
-    status: string
-    current_period_end: string | null
-    created_at: string | null
-    updated_at: string | null
+    user_id: string
+    tier: Database['public']['Enums']['subscription_tier']
+    status: Database['public']['Enums']['subscription_status']
+    current_period_end: string
+    created_at: string
+    updated_at: string
   }
   Insert: {
     id?: string
-    user_id?: string | null
-    tier: string
-    status: string
-    current_period_end?: string | null
-    created_at?: string | null
-    updated_at?: string | null
+    user_id: string
+    tier: Database['public']['Enums']['subscription_tier']
+    status: Database['public']['Enums']['subscription_status']
+    current_period_end: string
+    created_at?: string
+    updated_at?: string
   }
   Update: {
     id?: string
-    user_id?: string | null
-    tier?: string
-    status?: string
-    current_period_end?: string | null
-    created_at?: string | null
-    updated_at?: string | null
+    user_id?: string
+    tier?: Database['public']['Enums']['subscription_tier']
+    status?: Database['public']['Enums']['subscription_status']
+    current_period_end?: string
+    created_at?: string
+    updated_at?: string
   }
   Relationships: [
     {
       foreignKeyName: "subscriptions_user_id_fkey"
       columns: ["user_id"]
-      referencedRelation: "profiles"
+      referencedRelation: "users"
       referencedColumns: ["id"]
     }
   ]

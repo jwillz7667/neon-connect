@@ -6,170 +6,75 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       profiles: {
         Row: {
-          age: number | null
-          availability: string | null
-          avatar_url: string | null
-          bio: string | null
-          birthdate: string | null
-          body_type: string | null
-          city: string | null
-          contact_info: Json | null
+          id: string
           created_at: string
-          email: string | null
-          ethnicity: string | null
-          eye_color: string | null
-          full_name: string | null
-          hair_color: string | null
-          height: string | null
-          id: string
-          languages: string[] | null
-          measurements: string | null
-          provider_since: string | null
-          rates: Json | null
-          role: string | null
-          services: string[] | null
-          state: string | null
           updated_at: string
-          username: string | null
-          verification_documents: Json | null
-          verification_status: string | null
-          verified_at: string | null
-          website: string | null
+          full_name: string | null
+          birthdate: string | null
+          email: string | null
+          avatar_url: string | null
+          role: 'user' | 'provider' | 'admin'
+          verification_status: 'pending' | 'approved' | 'rejected' | 'expired'
+          bio: string | null
+          city: string | null
+          contact_info: Record<string, string> | null
         }
         Insert: {
-          age?: number | null
-          availability?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          birthdate?: string | null
-          body_type?: string | null
-          city?: string | null
-          contact_info?: Json | null
+          id?: string
           created_at?: string
-          email?: string | null
-          ethnicity?: string | null
-          eye_color?: string | null
-          full_name?: string | null
-          hair_color?: string | null
-          height?: string | null
-          id: string
-          languages?: string[] | null
-          measurements?: string | null
-          provider_since?: string | null
-          rates?: Json | null
-          role?: string | null
-          services?: string[] | null
-          state?: string | null
           updated_at?: string
-          username?: string | null
-          verification_documents?: Json | null
-          verification_status?: string | null
-          verified_at?: string | null
-          website?: string | null
-        }
-        Update: {
-          age?: number | null
-          availability?: string | null
-          avatar_url?: string | null
-          bio?: string | null
+          full_name?: string | null
           birthdate?: string | null
-          body_type?: string | null
-          city?: string | null
-          contact_info?: Json | null
-          created_at?: string
           email?: string | null
-          ethnicity?: string | null
-          eye_color?: string | null
-          full_name?: string | null
-          hair_color?: string | null
-          height?: string | null
+          avatar_url?: string | null
+          role?: 'user' | 'provider' | 'admin'
+          verification_status?: 'pending' | 'approved' | 'rejected' | 'expired'
+          bio?: string | null
+          city?: string | null
+          contact_info?: Record<string, string> | null
+        }
+        Update: {
           id?: string
-          languages?: string[] | null
-          measurements?: string | null
-          provider_since?: string | null
-          rates?: Json | null
-          role?: string | null
-          services?: string[] | null
-          state?: string | null
+          created_at?: string
           updated_at?: string
-          username?: string | null
-          verification_documents?: Json | null
-          verification_status?: string | null
-          verified_at?: string | null
-          website?: string | null
+          full_name?: string | null
+          birthdate?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          role?: 'user' | 'provider' | 'admin'
+          verification_status?: 'pending' | 'approved' | 'rejected' | 'expired'
+          bio?: string | null
+          city?: string | null
+          contact_info?: Record<string, string> | null
         }
-        Relationships: []
       }
-      subscriptions: {
+      profile_photos: {
         Row: {
-          created_at: string | null
-          current_period_end: string | null
           id: string
-          status: string
-          tier: string
-          updated_at: string | null
-          user_id: string | null
+          created_at: string
+          updated_at: string
+          profile_id: string
+          url: string
         }
         Insert: {
-          created_at?: string | null
-          current_period_end?: string | null
           id?: string
-          status: string
-          tier: string
-          updated_at?: string | null
-          user_id?: string | null
+          created_at?: string
+          updated_at?: string
+          profile_id: string
+          url: string
         }
         Update: {
-          created_at?: string | null
-          current_period_end?: string | null
           id?: string
-          status?: string
-          tier?: string
-          updated_at?: string | null
-          user_id?: string | null
+          created_at?: string
+          updated_at?: string
+          profile_id?: string
+          url?: string
         }
-        Relationships: []
-      }
-      verification_requests: {
-        Row: {
-          created_at: string | null
-          documents: Json | null
-          id: string
-          reviewed_at: string | null
-          reviewer_notes: string | null
-          status: string | null
-          submitted_at: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          documents?: Json | null
-          id?: string
-          reviewed_at?: string | null
-          reviewer_notes?: string | null
-          status?: string | null
-          submitted_at?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          documents?: Json | null
-          id?: string
-          reviewed_at?: string | null
-          reviewer_notes?: string | null
-          status?: string | null
-          submitted_at?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -181,105 +86,5 @@ export type Database = {
     Enums: {
       [_ in never]: never
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
 }
-
-type PublicSchema = Database[Extract<keyof Database, "public">]
-
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never

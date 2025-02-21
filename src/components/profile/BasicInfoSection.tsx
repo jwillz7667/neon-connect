@@ -1,190 +1,115 @@
-import React, { useState } from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { validateImage, optimizeImage } from '@/lib/image-utils';
-import { useToast } from '@/components/ui/use-toast';
-import { ProfileFormData } from '@/types/profile';
+import type { Database } from '@/types/supabase';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface BasicInfoSectionProps {
-  form: UseFormReturn<ProfileFormData>;
+  profile: Profile;
 }
 
-const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ form }) => {
-  const { toast } = useToast();
-  const [isProcessingImage, setIsProcessingImage] = useState(false);
-
-  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessingImage(true);
-    try {
-      // Validate image
-      const validationError = await validateImage(file);
-      if (validationError) {
-        toast({
-          title: 'Invalid Image',
-          description: validationError.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Optimize image
-      const optimizedFile = await optimizeImage(file);
-      form.setValue('avatarFile', optimizedFile);
-      
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(optimizedFile);
-      form.setValue('avatarUrl', previewUrl);
-
-      toast({
-        title: 'Image Processed',
-        description: 'Your profile picture has been optimized and is ready to upload.',
-      });
-    } catch (error) {
-      console.error('Error processing image:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to process image. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsProcessingImage(false);
-    }
-  };
-
+export function BasicInfoSection({ profile }: BasicInfoSectionProps) {
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-
-      <div className="flex items-center space-x-4 mb-6">
-        {form.watch('avatarUrl') && (
-          <img
-            src={form.watch('avatarUrl')}
-            alt="Profile preview"
-            className="w-24 h-24 rounded-full object-cover"
-          />
-        )}
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isProcessingImage}
-            onClick={() => document.getElementById('avatar-upload')?.click()}
-          >
-            {isProcessingImage ? 'Processing...' : 'Upload Photo'}
-          </Button>
-          <input
-            id="avatar-upload"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleImageChange}
-            disabled={isProcessingImage}
-          />
-          <p className="text-sm text-gray-400 mt-2">
-            Supported formats: JPEG, PNG, WebP. Max size: 5MB
-          </p>
-        </div>
+    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="px-4 py-5 sm:px-6">
+        <h3 className="text-lg leading-6 font-medium text-gray-900">Basic Information</h3>
+        <p className="mt-1 max-w-2xl text-sm text-gray-500">Personal details and contact information</p>
       </div>
 
-      <FormField
-        control={form.control}
-        name="username"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Username</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="border-t border-gray-200">
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 p-6">
+          {/* Username */}
+          <div className="sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-500">Username</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.username || 'Not specified'}</dd>
+          </div>
 
-      <FormField
-        control={form.control}
-        name="fullName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Full Name</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          {/* Full Name */}
+          <div className="sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-500">Full Name</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.full_name || 'Not specified'}</dd>
+          </div>
 
-      <FormField
-        control={form.control}
-        name="bio"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Bio</FormLabel>
-            <FormControl>
-              <Textarea {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          {/* Email */}
+          <div className="sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-500">Email</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.email || 'Not specified'}</dd>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>City</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          {/* Bio */}
+          <div className="sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-500">Bio</dt>
+            <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.bio || 'No bio provided'}</dd>
+          </div>
+
+          {/* Location */}
+          <div>
+            <dt className="text-sm font-medium text-gray-500">City</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.city || 'Not specified'}</dd>
+          </div>
+
+          <div>
+            <dt className="text-sm font-medium text-gray-500">State</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.state || 'Not specified'}</dd>
+          </div>
+
+          {/* Website */}
+          {profile.website && (
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-medium text-gray-500">Website</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                <a 
+                  href={profile.website}
+                  className="text-indigo-600 hover:text-indigo-500"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {profile.website}
+                </a>
+              </dd>
+            </div>
           )}
-        />
 
-        <FormField
-          control={form.control}
-          name="state"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>State</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Languages */}
+          <div className="sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-500">Languages</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {profile.languages ? profile.languages.join(', ') : 'Not specified'}
+            </dd>
+          </div>
+
+          {/* Role and Verification Status */}
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Role</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.role}</dd>
+          </div>
+
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Verification Status</dt>
+            <dd className="mt-1 text-sm text-gray-900">{profile.verification_status}</dd>
+          </div>
+
+          {/* Provider Since */}
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Provider Since</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {profile.provider_since 
+                ? new Date(profile.provider_since).toLocaleDateString()
+                : 'Not specified'}
+            </dd>
+          </div>
+
+          {/* Last Updated */}
+          <div>
+            <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {profile.updated_at
+                ? new Date(profile.updated_at).toLocaleDateString()
+                : 'Not specified'}
+            </dd>
+          </div>
+        </dl>
       </div>
-
-      <FormField
-        control={form.control}
-        name="website"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Website</FormLabel>
-            <FormControl>
-              <Input {...field} type="url" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
-};
+}
 
 export default BasicInfoSection;

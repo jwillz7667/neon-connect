@@ -1,63 +1,62 @@
-
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/lib/db-helpers';
+import type { Database } from '@/types/supabase';
 
-const SubscriptionSuccess = () => {
-  const [searchParams] = useSearchParams();
+type SubscriptionTier = Database['public']['Enums']['subscription_tier'];
+type SubscriptionStatus = Database['public']['Enums']['subscription_status'];
+type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
+
+export default function SubscriptionSuccess() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const tier = searchParams.get('tier');
-
+  const [searchParams] = useSearchParams();
+  
   useEffect(() => {
-    const updateSubscription = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) throw new Error('No user found');
-
-        // Update subscription in the new subscriptions table
-        const { error } = await supabase
-          .from('subscriptions')
-          .upsert({
-            user_id: user.id,
-            tier: tier || 'standard',
-            status: 'active',
-            current_period_end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          });
-
-        if (error) throw error;
-
-        toast({
-          title: "Success!",
-          description: "Your subscription has been activated.",
-        });
-      } catch (error) {
-        console.error('Error updating subscription:', error);
-        toast({
-          title: "Error",
-          description: "Failed to activate subscription. Please contact support.",
-          variant: "destructive",
-        });
+    const createSubscription = async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        navigate('/login');
+        return;
       }
+
+      const tier = searchParams.get('tier') as SubscriptionTier || 'basic';
+      
+      const newSubscription: SubscriptionInsert = {
+        user_id: user.data.user.id,
+        tier: tier,
+        status: 'active' as SubscriptionStatus,
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .upsert(newSubscription);
+
+      if (error) {
+        console.error('Error creating subscription:', error);
+        // Handle error appropriately
+        return;
+      }
+
+      // Redirect to dashboard or appropriate page
+      navigate('/dashboard');
     };
 
-    updateSubscription();
-  }, [tier, toast]);
+    createSubscription();
+  }, [navigate, searchParams]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Thank You!</h1>
-        <p className="text-xl mb-8">Your subscription has been processed successfully.</p>
-        <Button onClick={() => navigate('/')}>
-          Return to Home
-        </Button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 p-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            Setting up your subscription...
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Please wait while we configure your account.
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default SubscriptionSuccess;
+}

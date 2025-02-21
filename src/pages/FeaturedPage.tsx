@@ -1,8 +1,10 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ProfileGrid from '@/components/home/ProfileGrid';
+import type { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const FeaturedPage = () => {
   const { data: profiles, isLoading, error } = useQuery({
@@ -11,12 +13,12 @@ const FeaturedPage = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'provider')
+        .eq('role', 'provider' as const)
         .order('created_at', { ascending: false })
         .limit(8);
 
       if (error) throw error;
-      return data;
+      return data as Profile[];
     },
   });
 

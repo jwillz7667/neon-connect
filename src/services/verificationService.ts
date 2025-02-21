@@ -7,7 +7,7 @@ import { Buffer } from 'buffer';
 let modelsLoaded = false;
 
 // Initialize face-api.js models
-const loadModels = async () => {
+export const loadModels = async () => {
   try {
     if (modelsLoaded) {
       console.log('Models already loaded, skipping initialization');
@@ -15,12 +15,26 @@ const loadModels = async () => {
     }
 
     console.log('Loading face detection models...');
+    const modelPath = '/models';
+    
+    // First check if models exist
+    try {
+      const response = await fetch(`${modelPath}/ssd_mobilenetv1_model-weights_manifest.json`);
+      if (!response.ok) {
+        throw new Error('Face detection models not found. Please ensure models are properly installed.');
+      }
+    } catch (error) {
+      console.error('Error checking for models:', error);
+      throw new Error('Face detection models not found or inaccessible. Please ensure models are properly installed.');
+    }
+
+    // Load all required models
     await Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
-      faceapi.nets.faceExpressionNet.loadFromUri('/models'),
-      faceapi.nets.ageGenderNet.loadFromUri('/models'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('/models'), // Added face recognition model
+      faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath),
+      faceapi.nets.faceExpressionNet.loadFromUri(modelPath),
+      faceapi.nets.ageGenderNet.loadFromUri(modelPath),
+      faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+      faceapi.nets.faceRecognitionNet.loadFromUri(modelPath),
     ]);
     
     modelsLoaded = true;

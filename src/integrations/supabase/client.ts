@@ -31,3 +31,17 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     storage: window.localStorage
   }
 });
+
+// Helper types for better type inference
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
+export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+
+// Commonly used types
+export type Profile = Tables<'profiles'>;
+export type ProfilePhoto = Tables<'profile_photos'>;
+export type ProfileInsert = TablesInsert<'profiles'>;
+export type ProfileUpdate = TablesUpdate<'profiles'>;
+export type ProfilePhotoInsert = TablesInsert<'profile_photos'>;
+export type ProfilePhotoUpdate = TablesUpdate<'profile_photos'>;
