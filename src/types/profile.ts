@@ -2,6 +2,29 @@ import { UseFormReturn } from "react-hook-form";
 import { z } from 'zod';
 import type { Database } from '@/integrations/supabase/types';
 
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+
+export type Profile = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  full_name: string;
+  birthdate: string;
+  email: string;
+  avatar_url: string;
+  role: "user" | "provider" | "admin";
+  verification_status: "pending" | "approved" | "rejected" | "expired";
+  bio: string;
+  city: string;
+  contact_info: Json;
+  age?: number;
+  availability?: string;
+  body_type?: string;
+  ethnicity?: string;
+  username?: string;
+  website?: string;
+};
+
 type DbProfile = Database['public']['Tables']['profiles']['Row'];
 type DbProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 

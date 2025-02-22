@@ -7,22 +7,164 @@
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
     --radius: 0.75rem;
+    --neon-color: #FF1744;
+    --neon-purple: #8B00FF; /* Darker, more vibrant purple */
+    --neon-magenta: #E535FF; /* Bright magenta from screenshot */
   }
 
   body {
     @apply bg-black text-foreground min-h-screen relative overflow-x-hidden;
+    background-color: #000000;
   }
 
   #root {
     @apply min-h-screen relative;
   }
+
+  /* Text styles within glass cards */
+  .glass-card {
+    h1, h2, h3, h4, h5, h6 {
+      @apply text-white font-bold;
+    }
+
+    p {
+      @apply text-white/90;
+    }
+
+    label {
+      @apply text-white/90;
+    }
+  }
+
+  /* Default text styles */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-neon-red font-bold;
+  }
+
+  p {
+    @apply text-foreground/90;
+  }
+
+  a {
+    @apply text-neon-red hover:text-neon-red/80 transition-colors;
+  }
+
+  /* Global button styles */
+  button, .button {
+    @apply relative overflow-hidden backdrop-blur-sm transition-all duration-300;
+    @apply before:absolute before:inset-0 before:transition-all before:duration-300;
+    @apply hover:scale-[1.02] hover:shadow-lg active:scale-[0.98];
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  /* Global button styles within glass cards */
+  .glass-card {
+    button, .button, .btn-primary, .btn-secondary, .btn-alt {
+      @apply bg-white/20 border-2 border-white/50 text-white 
+      hover:bg-white/30 hover:border-white/70 hover:shadow-white/30
+      focus:ring-white/50 active:scale-[0.98];
+    }
+
+    .neon-button {
+      @apply px-4 py-2 bg-[#E535FF] backdrop-blur-md border-2 border-[#E535FF]/30 
+      text-white rounded-md shadow-lg transition-all duration-300 
+      hover:bg-[#E535FF]/90 hover:border-[#E535FF]/50 hover:shadow-[#E535FF]/20 
+      hover:scale-[1.02] active:scale-[0.98]
+      before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
+      before:via-white/5 before:to-transparent before:opacity-0 hover:before:opacity-100;
+    }
+
+    .neon-button-outline {
+      @apply px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#8B00FF] 
+      text-white rounded-md shadow-lg transition-all duration-300 
+      hover:bg-[#8B00FF]/10 hover:shadow-[#8B00FF]/30 hover:scale-[1.02] 
+      active:scale-[0.98] before:absolute before:inset-0 before:bg-gradient-to-r 
+      before:from-transparent before:via-white/5 before:to-transparent before:opacity-0 
+      hover:before:opacity-100;
+    }
+
+    .glass-button {
+      @apply relative overflow-hidden backdrop-blur-md bg-white/10 
+      border-2 border-white/30 rounded-md shadow-lg transition-all duration-300
+      hover:bg-white/20 hover:border-white/50 hover:shadow-xl text-white
+      active:scale-[0.98] before:absolute before:inset-0 
+      before:bg-gradient-to-r before:from-transparent before:via-white/10 
+      before:to-transparent before:opacity-0 hover:before:opacity-100;
+    }
+  }
 }
 
 @layer components {
+  /* Base button styles */
+  .button-base {
+    @apply relative overflow-hidden backdrop-blur-sm transition-all duration-300
+    before:absolute before:inset-0 before:transition-all before:duration-300
+    hover:scale-[1.02] hover:shadow-lg active:scale-[0.98];
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  /* Neon button variants */
+  .neon-button {
+    @apply button-base px-4 py-2 bg-[#E535FF] backdrop-blur-md border-2 border-[#E535FF]/30 
+    text-white rounded-md shadow-lg transition-all duration-300 
+    hover:bg-[#E535FF]/90 hover:border-[#E535FF]/50 hover:shadow-[#E535FF]/20 
+    before:bg-gradient-to-r before:from-transparent before:via-white/5 
+    before:to-transparent before:opacity-0 hover:before:opacity-100;
+  }
+
+  .neon-button-outline {
+    @apply button-base px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#8B00FF] 
+    text-white rounded-md shadow-lg transition-all duration-300 
+    hover:bg-[#8B00FF]/10 hover:shadow-[#8B00FF]/30
+    before:bg-gradient-to-r before:from-transparent before:via-white/5 
+    before:to-transparent before:opacity-0 hover:before:opacity-100;
+  }
+
+  /* Button variants */
+  .btn-primary, .signup-button, .browse-location-button {
+    @apply neon-button;
+  }
+
+  .btn-secondary, .btn-alt, .provider-button {
+    @apply neon-button-outline;
+  }
+
+  /* Glass card styles */
+  .glass-card {
+    @apply glass-card-base;
+
+    input, textarea, select {
+      @apply bg-white/10 border border-white/30 rounded-md px-4 py-2 
+      text-white placeholder-white/50 focus:outline-none 
+      focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all;
+    }
+
+    .form-label {
+      @apply block text-sm font-medium text-white/90 mb-1;
+    }
+
+    .radio-label {
+      @apply text-white/90;
+    }
+
+    button, .button {
+      @apply bg-white/20 border-2 border-white/50 text-white 
+      hover:bg-white/30 hover:border-white/70 hover:shadow-white/30
+      focus:ring-white/50 active:scale-[0.98];
+    }
+
+    .neon-button-magenta,
+    .neon-button-purple {
+      @apply border-white text-white hover:bg-white/10;
+    }
+  }
+
+  /* Rest of components */
   .app-background {
     @apply fixed inset-0 bg-cover bg-center bg-no-repeat -z-10;
-    background-image: url('/images/brick-background.jpg');
-    opacity: 0.95;
+    background-color: #000000;
   }
 
   body::before {
@@ -30,16 +172,29 @@
     @apply app-background;
   }
 
-  .glass-card {
-    @apply backdrop-blur-lg bg-black/95 border border-primary/20 shadow-lg;
-  }
-  
   .neon-border {
-    @apply border border-primary shadow-[0_0_15px_rgba(217,70,239,0.5)];
+    @apply border border-neon-red;
   }
   
   .neon-text {
-    @apply text-primary drop-shadow-[0_0_8px_rgba(217,70,239,0.8)];
+    @apply text-neon-red;
+  }
+
+  .card {
+    @apply glass-card-base rounded-lg p-6 transition-all duration-300;
+  }
+
+  .card:hover {
+    @apply shadow-[0_0_15px_rgba(255,23,68,0.3)];
+  }
+
+  .neon-logo {
+    @apply animate-neon-pulse;
+    --neon-color: #FF1744;
+  }
+
+  .nav-button {
+    @apply text-white hover:text-white/90 transition-colors;
   }
 }
 
@@ -50,10 +205,60 @@
 
 .navigation-menu-content {
   @apply animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 
-  data-[side=top]:slide-in-from-bottom-2 relative mt-2 !important;
+  data-[side=top]:slide-in-from-bottom-2 relative mt-2 bg-neon-purple/95 text-white 
+  border border-white/20 shadow-lg shadow-neon-purple/10 !important;
 }
 
 /* State overrides for navigation triggers */
 [data-state=open] {
   @apply bg-transparent !important;
+}
+
+@layer utilities {
+  .glow-sm {
+    box-shadow: 0 0 10px var(--glow-color, rgba(255, 23, 68, 0.3));
+  }
+  
+  .glow-md {
+    box-shadow: 0 0 20px var(--glow-color, rgba(255, 23, 68, 0.3));
+  }
+  
+  .glow-lg {
+    box-shadow: 0 0 30px var(--glow-color, rgba(255, 23, 68, 0.3));
+  }
+  
+  .glow-neon-red {
+    --glow-color: rgb(255, 23, 68);
+  }
+  
+  .glow-neon-magenta {
+    --glow-color: rgb(255, 0, 255);
+  }
+  
+  .glow-neon-purple {
+    --glow-color: rgb(139, 0, 255);
+  }
+
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(255, 23, 68, 0.1) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 23, 68, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Enhanced button hover effects */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .hover-glow {
+    @apply transition-shadow duration-300;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 20px var(--glow-color, rgba(255, 23, 68, 0.3));
+  }
+
+  .glass-card-base {
+    @apply backdrop-blur-lg bg-neon-purple/95 border border-white/30 shadow-lg text-white;
+  }
 }

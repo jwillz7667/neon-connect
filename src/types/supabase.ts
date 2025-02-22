@@ -292,6 +292,29 @@ export type Database = {
           }
         ]
       }
+      categories: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          monthly_price: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description: string;
+          monthly_price: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          monthly_price?: number;
+          created_at?: string;
+        };
+      }
     }
     Views: {
       [_ in never]: never

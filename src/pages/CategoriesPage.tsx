@@ -1,83 +1,134 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Heart, Sparkles, Star, Coffee, Music, Camera, Globe, Book } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-const categories = [
-  {
-    title: "New Members",
-    icon: Sparkles,
-    description: "Recently joined profiles",
-    link: "/search?category=new"
-  },
-  {
-    title: "Featured",
-    icon: Star,
-    description: "Our top rated profiles",
-    link: "/search?category=featured"
-  },
-  {
-    title: "Most Active",
-    icon: Heart,
-    description: "Frequently active members",
-    link: "/search?category=active"
-  },
-  {
-    title: "Coffee Dates",
-    icon: Coffee,
-    description: "Looking for casual meetups",
-    link: "/search?category=casual"
-  },
-  {
-    title: "Artists",
-    icon: Music,
-    description: "Creative souls",
-    link: "/search?category=artists"
-  },
-  {
-    title: "Photographers",
-    icon: Camera,
-    description: "Visual storytellers",
-    link: "/search?category=photographers"
-  },
-  {
-    title: "Travelers",
-    icon: Globe,
-    description: "Adventure seekers",
-    link: "/search?category=travelers"
-  },
-  {
-    title: "Intellectuals",
-    icon: Book,
-    description: "Deep thinkers",
-    link: "/search?category=intellectuals"
-  }
-];
+import { Button } from '@/components/ui/button';
+import { subscriptionService, Category } from '@/services/subscriptionService';
+import { useToast } from '@/components/ui/use-toast';
+import { loadStripe } from '@stripe/stripe-js';
 
 const CategoriesPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const state = searchParams.get('state');
+  const { toast } = useToast();
+  
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    const { data, error } = await subscriptionService.getCategories();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load categories",
+        variant: "destructive"
+      });
+      return;
+    }
+    setCategories(data || []);
+    setLoading(false);
+  };
+
+  const handleCategorySelect = async (category: Category) => {
+    try {
+      setProcessingId(category.id);
+      
+      // Check if already subscribed
+      const { data: isSubscribed } = await subscriptionService.checkSubscription(category.id);
+      if (isSubscribed) {
+        navigate(`/${category.id}?state=${state}`);
+        return;
+      }
+
+      // Handle subscription
+      if (category.monthly_price > 0) {
+        const { sessionId, error } = await subscriptionService.createCheckoutSession(category.id);
+        if (error) throw error;
+        
+        if (sessionId) {
+          // Redirect to Stripe checkout
+          const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+          await stripe?.redirectToCheckout({ sessionId });
+        }
+      } else {
+        // Handle free subscription
+        const { error } = await subscriptionService.createCheckoutSession(category.id);
+        if (error) throw error;
+        
+        navigate(`/${category.id}?state=${state}`);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process subscription",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 mt-20">
-      <h1 className="text-3xl font-bold mb-8 neon-text">Browse Categories</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Link key={category.title} to={category.link}>
-              <Card className="glass-card hover:bg-primary/5 transition-colors cursor-pointer border-primary/20 rounded-xl backdrop-blur-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon className="w-5 h-5 text-primary" />
-                    {category.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-400">{category.description}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-2 text-center neon-text">
+          Select Category
+        </h1>
+        {state && (
+          <p className="text-center text-primary/60 mb-8">
+            Location: {state}
+          </p>
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {categories.map((category) => (
+            <Card
+              key={category.id}
+              className="glass-card hover:bg-primary/5 transition-colors cursor-pointer border-primary/20"
+              onClick={() => handleCategorySelect(category)}
+            >
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary">
+                  {category.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-400 mb-4">{category.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xl font-semibold text-primary">
+                    {category.monthly_price > 0 
+                      ? `$${category.monthly_price}/month`
+                      : 'Free'}
+                  </span>
+                  <Button 
+                    variant="outline"
+                    className="neon-border"
+                    disabled={processingId === category.id}
+                  >
+                    {processingId === category.id ? (
+                      <span className="animate-pulse">Processing...</span>
+                    ) : (
+                      'Select'
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

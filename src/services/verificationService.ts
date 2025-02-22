@@ -63,6 +63,13 @@ interface FaceDetectionResult {
   error?: string;
 }
 
+interface VerificationRequest {
+  id: string;
+  user_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submitted_at: string;
+}
+
 export const validateAge = async (dateOfBirth: string): Promise<VerificationResult> => {
   const birthDate = new Date(dateOfBirth);
   const today = new Date();
@@ -336,13 +343,12 @@ const getFaceDescriptor = async (imageFile: File): Promise<Float32Array | null> 
 
 export const checkForDuplicateVerification = async (userId: string): Promise<boolean> => {
   try {
-    // Check for existing verification attempts
     const { data: existingVerifications, error } = await supabase
       .from('verification_requests')
-      .select('id, status, submitted_at')
-      .eq('user_id', userId)
+      .select('*')
+      .match({ user_id: userId })
       .order('submitted_at', { ascending: false })
-      .limit(1);
+      .limit(1) as { data: VerificationRequest[] | null; error: any };
 
     if (error) throw error;
 

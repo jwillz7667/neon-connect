@@ -4,12 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/assets/images/logo';
 import { MapPin } from 'lucide-react';
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  verifiedCount?: number;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ verifiedCount = 0 }) => {
   return (
     <div className="text-center py-16 mb-8">
       <div className="max-w-[800px] mx-auto mb-8">
         <Logo className="w-full h-auto hover:opacity-90 transition-opacity" />
       </div>
+      {verifiedCount > 0 && (
+        <p className="text-lg mb-6 neon-text">
+          Join our community of {verifiedCount} verified providers
+        </p>
+      )}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link to="/browse-location">
           <Button variant="default" size="lg" className="neon-text">
