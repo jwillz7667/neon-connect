@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/db-helpers';
 import { loadStripe } from '@stripe/stripe-js';
+import { env } from '@/config/environment';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export interface Category {
   id: string;
@@ -56,52 +57,37 @@ export const subscriptionService = {
   },
 
   // Initialize subscription checkout
-  async createCheckoutSession(categoryId: string): Promise<{ sessionId: string | null; error: any }> {
+  async createSubscription(priceId: string) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error('Stripe failed to load');
 
-      // Get category details
-      const { data: category } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single();
-
-      if (!category) throw new Error('Category not found');
-      if (category.monthly_price === 0) {
-        // Handle free subscription
-        const { error } = await supabase
-          .from('user_subscriptions')
-          .insert({
-            user_id: user.id,
-            category_id: categoryId,
-            status: 'active',
-            current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          });
-
-        if (error) throw error;
-        return { sessionId: null, error: null };
-      }
-
-      // Create Stripe checkout session
+      // Create the checkout session
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          categoryId,
-          userId: user.id,
-          price: category.monthly_price
+          priceId,
+          successUrl: `${env.VITE_SITE_URL}/subscription/success`,
+          cancelUrl: `${env.VITE_SITE_URL}/subscription/cancel`,
         }),
       });
 
       const session = await response.json();
-      return { sessionId: session.id, error: null };
+
+      // Redirect to checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
     } catch (error) {
-      return { sessionId: null, error };
+      console.error('Error creating subscription:', error);
+      throw error;
     }
   },
 
@@ -143,5 +129,15 @@ export const subscriptionService = {
     } catch (error) {
       return { success: false, error };
     }
-  }
+  },
+
+  async getSubscriptionStatus() {
+    try {
+      const response = await fetch('/api/subscription-status');
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting subscription status:', error);
+      throw error;
+    }
+  },
 }; 

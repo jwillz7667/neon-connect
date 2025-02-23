@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types/profile';
+import type { NavigationItem } from '@/types';
 import { NavLogo } from '@/assets/images/NavLogo';
 
 export default function Header() {
@@ -9,8 +10,17 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [navigation, setNavigation] = useState<{
+    primary: NavigationItem[];
+    secondary: NavigationItem[];
+  }>({
+    primary: [],
+    secondary: []
+  });
 
   useEffect(() => {
+    fetchNavigation();
+    
     // Get initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -34,6 +44,24 @@ export default function Header() {
       subscription.unsubscribe();
     };
   }, []);
+
+  const fetchNavigation = async () => {
+    try {
+      const { data: navItems, error } = await supabase
+        .from('navigation_items')
+        .select('*')
+        .order('sort_order');
+
+      if (error) throw error;
+
+      const primary = navItems.filter(item => item.nav_type === 'primary');
+      const secondary = navItems.filter(item => item.nav_type === 'secondary');
+
+      setNavigation({ primary, secondary });
+    } catch (error) {
+      console.error('Error fetching navigation:', error);
+    }
+  };
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -72,31 +100,47 @@ export default function Header() {
                 <NavLogo className="h-14 w-auto" />
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                to="/location"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-neon-purple hover:text-neon-purple/80 transition-colors"
-              >
-                Find
-              </Link>
-              {user?.role === 'provider' && (
+            
+            {/* Primary Navigation */}
+            <div className="hidden md:flex md:ml-8 space-x-8">
+              {navigation.primary.map((item) => (
                 <Link
-                  to="/dashboard"
-                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-neon-purple hover:text-neon-purple/80 transition-colors"
+                  key={item.path}
+                  to={item.path}
+                  className="inline-flex items-center px-1 pt-1 text-lg font-medium text-neon-purple hover:text-cyan-400 transition-all duration-300 hover:shadow-[0_0_10px_#00FFFF]"
                 >
-                  Dashboard
+                  {item.label}
                 </Link>
-              )}
-              <Link
-                to="/membership"
-                className="inline-flex items-center px-1 pt-1 text-sm font-medium text-neon-purple hover:text-neon-purple/80 transition-colors"
-              >
-                Membership
-              </Link>
+              ))}
             </div>
           </div>
 
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <input
+                type="search"
+                placeholder="Search NeonMeet..."
+                className="w-64 bg-black/50 text-white px-4 py-2 rounded-lg border border-neon-purple/20 focus:outline-none focus:border-cyan-400 transition-all duration-300"
+              />
+            </div>
+
+            {/* Secondary Navigation */}
+            {navigation.secondary.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                  item.isHighlighted
+                    ? 'bg-fuchsia-600 text-white hover:bg-fuchsia-500 hover:shadow-[0_0_20px_#FF00FF]'
+                    : 'text-neon-purple hover:text-cyan-400 hover:shadow-[0_0_10px_#00FFFF]'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+
+            {/* Auth Section */}
             {loading ? (
               <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-neon-purple" />
             ) : user ? (
@@ -173,13 +217,13 @@ export default function Header() {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="text-neon-purple hover:text-neon-purple/80 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-neon-purple hover:text-[#FF00FF] px-3 py-2 rounded-md text-sm font-medium transition-colors hover:shadow-[0_0_10px_#FF00FF]"
                 >
                   Log in
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-2 bg-transparent border-2 border-neon-purple text-neon-purple rounded-md transition-all duration-300 hover:bg-neon-purple/10"
+                  className="px-4 py-2 bg-transparent border-2 border-neon-purple text-neon-purple rounded-md transition-all duration-300 hover:bg-neon-purple/10 hover:shadow-[0_0_20px_#FF00FF]"
                 >
                   Sign up
                 </Link>
@@ -188,10 +232,10 @@ export default function Header() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="flex items-center sm:hidden">
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-neon-purple hover:text-neon-purple/80 hover:bg-neon-purple/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-purple transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-md text-neon-purple hover:text-cyan-400 hover:bg-neon-purple/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-neon-purple transition-colors"
             >
               <span className="sr-only">Open main menu</span>
               {isMenuOpen ? (
@@ -210,31 +254,28 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="sm:hidden bg-black/95 border-t border-neon-purple/20">
+        <div className="md:hidden bg-black/95 border-t border-neon-purple/20">
           <div className="pt-2 pb-3 space-y-1">
-            <Link
-              to="/location"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-neon-purple hover:bg-neon-purple/10 hover:border-neon-purple transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Find
-            </Link>
-            {user?.role === 'provider' && (
+            {navigation.primary.map((item) => (
               <Link
-                to="/dashboard"
+                key={item.path}
+                to={item.path}
                 className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-neon-purple hover:bg-neon-purple/10 hover:border-neon-purple transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Dashboard
+                {item.label}
               </Link>
-            )}
-            <Link
-              to="/membership"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-neon-purple hover:bg-neon-purple/10 hover:border-neon-purple transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Membership
-            </Link>
+            ))}
+            {navigation.secondary.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-neon-purple hover:bg-neon-purple/10 hover:border-neon-purple transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
 
           {user && (

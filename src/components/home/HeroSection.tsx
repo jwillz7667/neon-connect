@@ -20,7 +20,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ verifiedCount = 0 }) => {
         </p>
       )}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Link to="/browse-location">
+        <Link to="/locations">
           <Button variant="default" size="lg" className="neon-text">
             <MapPin className="mr-2 h-5 w-5" />
             Browse by Location

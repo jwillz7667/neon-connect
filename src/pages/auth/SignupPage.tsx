@@ -85,16 +85,14 @@ function SignupPage() {
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
       
       <GlassCard 
+        variant="auth"
         className="w-full max-w-md p-8 space-y-8"
-        hoverable
       >
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-500">
+          <h2 className="text-center text-3xl font-bold text-white">Create your account</h2>
+          <p className="mt-2 text-center text-sm text-white/70">
             Or{' '}
-            <Link to="/login" className="font-medium text-neon-purple hover:text-neon-purple/80 transition-colors">
+            <Link to="/login" className="font-medium text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors">
               sign in to your account
             </Link>
           </p>
@@ -109,7 +107,7 @@ function SignupPage() {
           
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
                 Email address
               </label>
               <input
@@ -117,14 +115,16 @@ function SignupPage() {
                 name="email"
                 type="email"
                 required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-white placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-neon-purple focus:border-neon-purple sm:text-sm transition-colors"
+                className="appearance-none relative block w-full px-3 py-2 bg-black/50 text-white placeholder-white/50 
+                border-2 border-[#FF00FF]/30 rounded-md focus:outline-none focus:ring-1 focus:ring-[#FF00FF] focus:border-[#FF00FF] 
+                sm:text-sm transition-colors"
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
                 Password
               </label>
               <input
@@ -132,14 +132,16 @@ function SignupPage() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-white placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-neon-purple focus:border-neon-purple sm:text-sm transition-colors"
+                className="appearance-none relative block w-full px-3 py-2 bg-black/50 text-white placeholder-white/50 
+                border-2 border-[#FF00FF]/30 rounded-md focus:outline-none focus:ring-1 focus:ring-[#FF00FF] focus:border-[#FF00FF] 
+                sm:text-sm transition-colors"
                 placeholder="Create a password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-1">
                 Confirm Password
               </label>
               <input
@@ -147,7 +149,9 @@ function SignupPage() {
                 name="confirmPassword"
                 type="password"
                 required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-white placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-1 focus:ring-neon-purple focus:border-neon-purple sm:text-sm transition-colors"
+                className="appearance-none relative block w-full px-3 py-2 bg-black/50 text-white placeholder-white/50 
+                border-2 border-[#FF00FF]/30 rounded-md focus:outline-none focus:ring-1 focus:ring-[#FF00FF] focus:border-[#FF00FF] 
+                sm:text-sm transition-colors"
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -156,64 +160,54 @@ function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Account Type
             </label>
             <div className="flex items-center justify-center space-x-6">
               <label className="inline-flex items-center">
                 <input
                   type="radio"
-                  className="form-radio text-neon-purple focus:ring-neon-purple"
+                  className="text-[#FF00FF] focus:ring-[#FF00FF] border-[#FF00FF]/30"
                   name="role"
                   value="user"
                   checked={formData.role === 'user'}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'provider' })}
                 />
-                <span className="ml-2 text-gray-700">User</span>
+                <span className="ml-2 text-white">User</span>
               </label>
               <label className="inline-flex items-center">
                 <input
                   type="radio"
-                  className="form-radio text-neon-purple focus:ring-neon-purple"
+                  className="text-[#FF00FF] focus:ring-[#FF00FF] border-[#FF00FF]/30"
                   name="role"
                   value="provider"
                   checked={formData.role === 'provider'}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'provider' })}
                 />
-                <span className="ml-2 text-gray-700">Provider</span>
+                <span className="ml-2 text-white">Provider</span>
               </label>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-neon-purple hover:bg-neon-purple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-purple transition-all duration-300 ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {loading ? (
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-              ) : null}
-              {loading ? 'Signing up...' : 'Sign up'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#FF00FF] text-white py-3 rounded-md border-2 border-[#FF00FF]/30 
+            hover:bg-[#FF00FF]/90 hover:border-[#FF00FF] transition-all duration-300 
+            focus:outline-none focus:ring-2 focus:ring-[#FF00FF]/50 text-lg font-medium"
+          >
+            {loading ? 'Signing up...' : 'Sign up'}
+          </button>
         </form>
 
         <div className="text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white/70">
             By signing up, you agree to our{' '}
-            <Link to="/terms" className="font-medium text-neon-purple hover:text-neon-purple/80 transition-colors">
+            <Link to="/terms" className="font-medium text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors">
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link to="/privacy" className="font-medium text-neon-purple hover:text-neon-purple/80 transition-colors">
+            <Link to="/privacy" className="font-medium text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors">
               Privacy Policy
             </Link>
           </p>

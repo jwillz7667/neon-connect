@@ -39,6 +39,18 @@
     <meta property="twitter:title" content="NeonMeet - Connect in Style">
     <meta property="twitter:description" content="Join NeonMeet - The premium social platform for meaningful connections">
     <meta property="twitter:image" content="/neon-logo.png">
+
+    <!-- Update CSP to allow Stripe and other necessary resources -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self' https://*.supabase.co https://*.supabase.in;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in;
+      font-src 'self';
+      connect-src 'self' https://*.supabase.co https://*.supabase.in https://api.stripe.com;
+      frame-src 'self' https://js.stripe.com;
+      object-src 'none';
+    ">
   </head>
   <body>
     <div id="root"></div>

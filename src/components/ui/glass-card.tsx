@@ -3,7 +3,7 @@ import React from 'react';
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: 'default' | 'dark' | 'light';
+  variant?: 'default' | 'dark' | 'light' | 'auth';
   neonBorder?: boolean;
   hoverable?: boolean;
 }
@@ -17,9 +17,24 @@ export function GlassCard({
   ...props
 }: GlassCardProps) {
   const variants = {
-    default: 'bg-neon-purple/95 text-white',
-    dark: 'bg-neon-purple text-white',
-    light: 'bg-neon-purple/90 text-white',
+    default: 'bg-black text-white',
+    dark: 'bg-black text-white',
+    light: 'bg-black/90 text-white',
+    auth: 'bg-black auth-form'
+  };
+
+  const getBorderStyles = (variant: string) => {
+    if (variant === 'auth') {
+      return 'border-2 border-[#FF00FF]';
+    }
+    return neonBorder ? 'border-2 border-[#FF00FF]/50' : '';
+  };
+
+  const getGlowStyles = (variant: string) => {
+    if (variant === 'auth') {
+      return '';  // Glow is handled by auth-form class
+    }
+    return neonBorder ? 'shadow-xl shadow-[#FF00FF]/30' : 'shadow-xl';
   };
 
   return (
@@ -29,25 +44,27 @@ export function GlassCard({
         'rounded-lg backdrop-blur-[12px]',
         // Variant styles
         variants[variant],
-        // Border styles
-        neonBorder && 'border border-white/30',
-        // Shadow and glow effects
-        'shadow-xl shadow-black/10',
-        neonBorder && 'glow-md glow-neon-purple/30',
+        // Border and glow effects
+        getBorderStyles(variant),
+        getGlowStyles(variant),
         // Hover effects
-        hoverable && 'transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-neon-purple/40 hover:border-white/40',
+        hoverable && variant !== 'auth' && 'transition-all duration-300 hover:shadow-2xl hover:shadow-[#FF00FF]/50 hover:border-[#FF00FF]/70',
         // Additional effects for depth
         'backdrop-saturate-200',
         // Custom classes
         className
       )}
+      style={{
+        boxShadow: variant === 'auth' ? '0 4px 30px rgba(255, 0, 255, 0.3)' : undefined
+      }}
       {...props}
     >
       <div className="relative z-10">
         {children}
       </div>
-      {/* Additional subtle gradient overlay for depth */}
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      {variant !== 'auth' && (
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      )}
     </div>
   );
 } 

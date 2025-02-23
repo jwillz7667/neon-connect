@@ -25,27 +25,27 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#E535FF",
+          DEFAULT: "#FF00FF",
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#8B00FF",
+          DEFAULT: "#FF1493",
           foreground: "#FFFFFF",
         },
         accent: {
-          DEFAULT: "#FF1744",
+          DEFAULT: "#FF00FF",
           foreground: "#000000",
         },
         neon: {
           cyan: "#00FFFF",
-          magenta: "#E535FF",
-          red: "#FF1744",
+          magenta: "#FF00FF",
+          red: "#FF00FF",
           blue: "#0080FF",
-          purple: "#8B00FF",
+          purple: "#FF00FF",
         },
-        'neon-red': '#FF1744',
-        'neon-magenta': '#E535FF',
-        'neon-purple': '#8B00FF',
+        'neon-red': '#FF00FF',
+        'neon-magenta': '#FF00FF',
+        'neon-purple': '#FF00FF',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -78,7 +78,7 @@ export default {
         "glass-shine": "glass-shine 2s linear infinite",
       },
       backgroundImage: {
-        "gradient-dark": "linear-gradient(135deg, #000000 0%, rgba(139, 0, 255, 0.2) 100%)",
+        "gradient-dark": "linear-gradient(135deg, #000000 0%, rgba(255, 0, 255, 0.2) 100%)",
         "glass-gradient": "linear-gradient(120deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2))",
       },
       boxShadow: {

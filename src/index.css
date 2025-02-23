@@ -7,9 +7,11 @@
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
     --radius: 0.75rem;
-    --neon-color: #FF1744;
-    --neon-purple: #8B00FF; /* Darker, more vibrant purple */
-    --neon-magenta: #E535FF; /* Bright magenta from screenshot */
+    --neon-color: #FF00FF;
+    --neon-purple: #FF00FF; /* Standardized magenta */
+    --neon-magenta: #FF00FF; /* Standardized magenta */
+    --card-glow: 0 4px 20px -2px rgba(255, 0, 255, 0.5);
+    --floating-shadow: 0 10px 30px -10px rgba(255, 0, 255, 0.5);
   }
 
   body {
@@ -67,18 +69,18 @@
     }
 
     .neon-button {
-      @apply px-4 py-2 bg-[#E535FF] backdrop-blur-md border-2 border-[#E535FF]/30 
+      @apply px-4 py-2 bg-[#FF00FF] backdrop-blur-md border-2 border-[#FF00FF]/30 
       text-white rounded-md shadow-lg transition-all duration-300 
-      hover:bg-[#E535FF]/90 hover:border-[#E535FF]/50 hover:shadow-[#E535FF]/20 
+      hover:bg-[#FF00FF]/90 hover:border-[#FF00FF]/50 hover:shadow-[#FF00FF]/20 
       hover:scale-[1.02] active:scale-[0.98]
       before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent 
       before:via-white/5 before:to-transparent before:opacity-0 hover:before:opacity-100;
     }
 
     .neon-button-outline {
-      @apply px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#8B00FF] 
+      @apply px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#FF00FF] 
       text-white rounded-md shadow-lg transition-all duration-300 
-      hover:bg-[#8B00FF]/10 hover:shadow-[#8B00FF]/30 hover:scale-[1.02] 
+      hover:bg-[#FF00FF]/10 hover:shadow-[#FF00FF]/30 hover:scale-[1.02] 
       active:scale-[0.98] before:absolute before:inset-0 before:bg-gradient-to-r 
       before:from-transparent before:via-white/5 before:to-transparent before:opacity-0 
       hover:before:opacity-100;
@@ -92,6 +94,12 @@
       before:bg-gradient-to-r before:from-transparent before:via-white/10 
       before:to-transparent before:opacity-0 hover:before:opacity-100;
     }
+  }
+
+  /* Footer styles */
+  footer {
+    @apply bg-black border-t-2 border-[#FF00FF] mt-auto;
+    box-shadow: 0 -4px 20px -2px rgba(255, 0, 255, 0.3);
   }
 }
 
@@ -107,17 +115,17 @@
 
   /* Neon button variants */
   .neon-button {
-    @apply button-base px-4 py-2 bg-[#E535FF] backdrop-blur-md border-2 border-[#E535FF]/30 
+    @apply button-base px-4 py-2 bg-[#FF00FF] backdrop-blur-md border-2 border-[#FF00FF]/30 
     text-white rounded-md shadow-lg transition-all duration-300 
-    hover:bg-[#E535FF]/90 hover:border-[#E535FF]/50 hover:shadow-[#E535FF]/20 
+    hover:bg-[#FF00FF]/90 hover:border-[#FF00FF]/50 hover:shadow-[#FF00FF]/20 
     before:bg-gradient-to-r before:from-transparent before:via-white/5 
     before:to-transparent before:opacity-0 hover:before:opacity-100;
   }
 
   .neon-button-outline {
-    @apply button-base px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#8B00FF] 
+    @apply button-base px-4 py-2 bg-transparent backdrop-blur-md border-2 border-[#FF00FF] 
     text-white rounded-md shadow-lg transition-all duration-300 
-    hover:bg-[#8B00FF]/10 hover:shadow-[#8B00FF]/30
+    hover:bg-[#FF00FF]/10 hover:shadow-[#FF00FF]/30
     before:bg-gradient-to-r before:from-transparent before:via-white/5 
     before:to-transparent before:opacity-0 hover:before:opacity-100;
   }
@@ -133,32 +141,100 @@
 
   /* Glass card styles */
   .glass-card {
-    @apply glass-card-base;
+    @apply glass-card-base rounded-lg p-4;
+  }
 
-    input, textarea, select {
-      @apply bg-white/10 border border-white/30 rounded-md px-4 py-2 
-      text-white placeholder-white/50 focus:outline-none 
-      focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all;
-    }
+  .glass-card-base {
+    @apply bg-black text-white relative overflow-hidden;
+    box-shadow: 0 4px 30px rgba(255, 0, 255, 0.3);
+    border: 2px solid rgba(255, 0, 255, 0.5);
+    transition: all 0.3s ease-in-out;
+  }
 
-    .form-label {
-      @apply block text-sm font-medium text-white/90 mb-1;
-    }
+  .glass-card:hover {
+    box-shadow: 0 8px 32px rgba(255, 0, 255, 0.5);
+    border-color: rgba(255, 0, 255, 0.7);
+  }
 
-    .radio-label {
-      @apply text-white/90;
-    }
+  /* Remove floating animation */
+  .floating-card {
+    transform: translateZ(0);
+  }
 
-    button, .button {
-      @apply bg-white/20 border-2 border-white/50 text-white 
-      hover:bg-white/30 hover:border-white/70 hover:shadow-white/30
-      focus:ring-white/50 active:scale-[0.98];
-    }
+  .glass-card-base:hover {
+    box-shadow: 0 8px 30px rgba(255, 0, 255, 0.5);
+    transform: translateY(-2px) translateZ(0);
+  }
 
-    .neon-button-magenta,
-    .neon-button-purple {
-      @apply border-white text-white hover:bg-white/10;
-    }
+  /* Authentication form specific styles */
+  .auth-form {
+    @apply rounded-lg p-6 bg-black relative;
+    border: 2px solid #FF00FF !important;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.5),
+                inset 0 0 20px rgba(255, 0, 255, 0.2) !important;
+  }
+
+  .auth-form:hover {
+    box-shadow: 0 0 40px rgba(255, 0, 255, 0.6),
+                inset 0 0 25px rgba(255, 0, 255, 0.3) !important;
+  }
+
+  /* Auth form text styles */
+  .auth-form h1,
+  .auth-form h2,
+  .auth-form h3,
+  .auth-form h4,
+  .auth-form h5,
+  .auth-form h6,
+  .auth-form .heading {
+    @apply text-white font-semibold text-3xl mb-6 text-center;
+  }
+
+  .auth-form p,
+  .auth-form label {
+    @apply text-white mb-2 block font-medium;
+  }
+
+  .auth-form a {
+    @apply text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors;
+  }
+
+  .auth-form input {
+    @apply bg-black/50 border-2 border-[#FF00FF] rounded-md px-4 py-2 w-full
+    text-white placeholder-white/50 mb-4
+    focus:border-[#FF00FF] focus:ring-2 focus:ring-[#FF00FF]/50
+    focus:outline-none transition-all;
+  }
+
+  .auth-form button {
+    @apply w-full bg-[#FF00FF] text-white py-3 rounded-md mt-2
+    border-2 border-[#FF00FF] transition-all duration-300
+    hover:bg-[#FF00FF]/90 hover:border-[#FF00FF]
+    focus:ring-2 focus:ring-[#FF00FF]/50
+    text-lg font-medium;
+  }
+
+  .auth-form .secondary-text {
+    @apply text-white/70 text-sm text-center mt-4;
+  }
+
+  .auth-form .link-text {
+    @apply text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors;
+  }
+
+  /* Radio button styles */
+  .auth-form .radio-group {
+    @apply flex gap-6 items-center my-6 justify-center;
+  }
+
+  .auth-form .radio-label {
+    @apply text-white/90 flex items-center gap-2 cursor-pointer text-lg;
+  }
+
+  .auth-form input[type="radio"] {
+    @apply w-5 h-5 border-2 border-[#FF00FF] 
+    checked:bg-[#FF00FF] checked:border-[#FF00FF]
+    focus:ring-2 focus:ring-[#FF00FF]/50;
   }
 
   /* Rest of components */
@@ -185,12 +261,13 @@
   }
 
   .card:hover {
-    @apply shadow-[0_0_15px_rgba(255,23,68,0.3)];
+    @apply shadow-[0_0_30px_rgba(255,0,255,0.5)];
+    transform: translateY(-2px);
   }
 
   .neon-logo {
     @apply animate-neon-pulse;
-    --neon-color: #FF1744;
+    --neon-color: #FF00FF;
   }
 
   .nav-button {
@@ -216,19 +293,19 @@
 
 @layer utilities {
   .glow-sm {
-    box-shadow: 0 0 10px var(--glow-color, rgba(255, 23, 68, 0.3));
+    box-shadow: 0 0 10px var(--glow-color, rgba(255, 0, 255, 0.3));
   }
   
   .glow-md {
-    box-shadow: 0 0 20px var(--glow-color, rgba(255, 23, 68, 0.3));
+    box-shadow: 0 0 20px var(--glow-color, rgba(255, 0, 255, 0.3));
   }
   
   .glow-lg {
-    box-shadow: 0 0 30px var(--glow-color, rgba(255, 23, 68, 0.3));
+    box-shadow: 0 0 30px var(--glow-color, rgba(255, 0, 255, 0.3));
   }
   
   .glow-neon-red {
-    --glow-color: rgb(255, 23, 68);
+    --glow-color: rgb(255, 0, 255);
   }
   
   .glow-neon-magenta {
@@ -236,12 +313,12 @@
   }
   
   .glow-neon-purple {
-    --glow-color: rgb(139, 0, 255);
+    --glow-color: rgb(255, 0, 255);
   }
 
   .bg-grid-pattern {
-    background-image: linear-gradient(to right, rgba(255, 23, 68, 0.1) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(255, 23, 68, 0.1) 1px, transparent 1px);
+    background-image: linear-gradient(to right, rgba(255, 0, 255, 0.1) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 0, 255, 0.1) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
@@ -255,10 +332,6 @@
   }
 
   .hover-glow:hover {
-    box-shadow: 0 0 20px var(--glow-color, rgba(255, 23, 68, 0.3));
-  }
-
-  .glass-card-base {
-    @apply backdrop-blur-lg bg-neon-purple/95 border border-white/30 shadow-lg text-white;
+    box-shadow: 0 0 20px var(--glow-color, rgba(255, 0, 255, 0.3));
   }
 }

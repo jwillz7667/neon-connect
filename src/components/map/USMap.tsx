@@ -8,7 +8,7 @@ const USMap = () => {
   const [hoveredState, setHoveredState] = useState<string | null>(null);
 
   const handleStateClick = (stateCode: string) => {
-    navigate(`/location/${stateCode.toLowerCase()}`);
+    navigate(`/category?state=${stateCode}`);
   };
 
   return (

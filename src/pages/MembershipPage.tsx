@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/db-helpers';
+import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/types/supabase';
 
 type SubscriptionTier = Database['public']['Enums']['subscription_tier'];

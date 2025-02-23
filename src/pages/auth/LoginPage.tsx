@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Card } from '@/components/ui/card';
+import { supabase } from '@/lib/supabase/client';
+import { GlassCard } from '@/components/ui/glass-card';
 import { Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -79,60 +79,80 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 neon-text">Sign In</h1>
-        <Card className="p-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </Button>
-            </form>
-          </Form>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </Card>
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative">
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/5 via-transparent to-neon-magenta/5" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+      
+      <GlassCard 
+        variant="auth"
+        className="w-full max-w-md p-8 space-y-8"
+      >
+        <div>
+          <h2 className="text-center text-3xl font-bold text-white">Sign In</h2>
+          <p className="mt-2 text-center text-sm text-white/70">
+            Or{' '}
+            <Link to="/signup" className="font-medium text-[#FF00FF] hover:text-[#FF00FF]/80 transition-colors">
+              create a new account
+            </Link>
+          </p>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      {...field} 
+                      className="bg-black/50 text-white placeholder-white/50 border-2 border-[#FF00FF]/30 focus:border-[#FF00FF] focus:ring-[#FF00FF]" 
+                      placeholder="Enter your email"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Password</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      {...field} 
+                      className="bg-black/50 text-white placeholder-white/50 border-2 border-[#FF00FF]/30 focus:border-[#FF00FF] focus:ring-[#FF00FF]" 
+                      placeholder="Enter your password"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-400" />
+                </FormItem>
+              )}
+            />
+            <Button 
+              type="submit" 
+              className="w-full bg-[#FF00FF] text-white border-2 border-[#FF00FF]/30 hover:bg-[#FF00FF]/90 hover:border-[#FF00FF]" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-white" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+        </Form>
+      </GlassCard>
     </div>
   );
 };

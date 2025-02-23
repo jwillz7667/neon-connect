@@ -540,4 +540,408 @@ interface ErrorResponse {
 
 ---
 
+# NeonMeet.com Rules & Specifications
+
+## Core Navigation Flow
+```typescript
+interface RouteStructure {
+  home: '/',
+  stateSelection: '/locations',
+  statePage: '/locations/:stateId',
+  providerProfile: '/provider/:providerId'
+}
+```
+
+## 1. Homepage (/) Specifications
+
+### Header Component
+```typescript
+interface HeaderProps {
+  logo: {
+    src: string; // NeonMeet.com logo
+    alt: 'NeonMeet.com';
+    height: number;
+    width: number;
+  };
+  navigation: {
+    primary: Array<{
+      label: 'ESCORTS' | 'MASSAGE' | 'AFFAIRS' | 'LIVE ESCORTS';
+      path: string;
+      isActive: boolean;
+    }>;
+    secondary: Array<{
+      label: 'SEARCH' | 'POST AD';
+      path: string;
+      isHighlighted?: boolean;
+    }>;
+  };
+  searchBar?: {
+    placeholder: 'Search NeonMeet...';
+    onSearch: (query: string) => void;
+  };
+}
+```
+
+### State Selection Grid
+```typescript
+interface StateGridProps {
+  states: Array<{
+    name: string; // All 50 US states
+    abbreviation: string;
+    path: string;
+    providerCount: number;
+    isActive: boolean;
+  }>;
+  layout: 'grid' | 'list';
+  onStateSelect: (stateId: string) => void;
+}
+```
+
+### Visual Requirements
+- Neon theme with primary color: #00FFFF (Cyan)
+- Secondary color: #FF00FF (Magenta)
+- Dark mode by default with rich blacks (#121212)
+- Hover states with neon glow effects
+- Smooth transitions (300ms ease-in-out)
+
+## 2. State Page (/locations/:stateId) Specifications
+
+### Provider Grid Component
+```typescript
+interface ProviderGridProps {
+  providers: Array<{
+    id: string;
+    name: string;
+    images: {
+      thumbnail: string;
+      full: string;
+    }[];
+    status: 'online' | 'offline';
+    verified: boolean;
+    featured: boolean;
+    rating: number;
+    categories: Array<'All Escorts' | "What's New" | 'VIP' | 'XXX Stars' | 'Visiting' | 'Available Now' | 'Super Busty' | 'Mature' | 'College Girls' | 'Video'>;
+    location: {
+      city: string;
+      state: string;
+    };
+  }>;
+  layout: 'grid' | 'list';
+  filters: {
+    availability: boolean;
+    verified: boolean;
+    featured: boolean;
+    categories: string[];
+  };
+  displayOptions: {
+    showVerifiedBadge: boolean;
+    showOnlineStatus: boolean;
+    showPhotoCount: boolean;
+  };
+}
+```
+
+### Category Filters
+```typescript
+interface CategoryFilters {
+  allEscorts: number; // Total count
+  whatsNew: number;
+  vip: number;
+  xxxStars: number;
+  visiting: number;
+  availableNow: number;
+  superBusty: number;
+  mature: number;
+  collegeGirls: number;
+  video: number;
+}
+```
+
+### Visual Requirements
+- Card-based grid layout with hover effects
+- Verification badges with neon glow
+- Status indicators (online/offline)
+- Photo count badges
+- Infinite scroll pagination
+
+## 3. Provider Profile (/provider/:providerId) Specifications
+
+### Profile Header
+```typescript
+interface ProfileHeaderProps {
+  provider: {
+    id: string;
+    name: string;
+    status: 'online' | 'offline';
+    verified: boolean;
+    rating: number;
+    location: {
+      city: string;
+      state: string;
+    };
+    contact: {
+      phone?: string;
+      email?: string;
+    };
+    categories: string[];
+    tagline: string;
+  };
+}
+```
+
+### Gallery Component
+```typescript
+interface GalleryProps {
+  images: Array<{
+    id: string;
+    url: string;
+    type: 'image' | 'video';
+    thumbnail: string;
+    isVerified: boolean;
+  }>;
+  layout: 'grid' | 'carousel';
+  maxPhotos: 10;
+}
+```
+
+### Visual Requirements
+- Full-width hero image/carousel
+- Neon-themed verification badge
+- Responsive gallery grid
+- Smooth image transitions
+- Contact button with glow effect
+- Photo count indicator
+
+## 4. State Management
+
+### Provider State
+```typescript
+interface ProviderState {
+  currentLocation: {
+    state: string;
+    city: string;
+  };
+  filters: {
+    category: string;
+    availability: boolean;
+    verification: boolean;
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+  providers: Provider[];
+  loading: boolean;
+  error: Error | null;
+}
+```
+
+### Category State
+```typescript
+interface CategoryState {
+  selected: string;
+  counts: {
+    [key: string]: number;
+  };
+  loading: boolean;
+}
+```
+
+## 5. API Integration
+
+### Provider API
+```typescript
+interface ProviderAPI {
+  getProviders: (state: string, filters: FilterOptions) => Promise<Provider[]>;
+  getProviderDetails: (id: string) => Promise<Provider>;
+  getProviderPhotos: (id: string) => Promise<Photo[]>;
+  verifyProvider: (id: string) => Promise<VerificationStatus>;
+  reportProvider: (id: string, reason: string) => Promise<void>;
+}
+```
+
+### Location API
+```typescript
+interface LocationAPI {
+  getStates: () => Promise<State[]>;
+  getCities: (state: string) => Promise<City[]>;
+  getProviderCount: (location: LocationQuery) => Promise<number>;
+}
+```
+
+## 6. Security & Privacy
+
+### Data Protection
+- All sensitive data must be encrypted
+- No caching of private information
+- Secure routing with authentication checks
+- Rate limiting on API endpoints
+- GDPR and CCPA compliance
+
+### Content Moderation
+```typescript
+interface ContentModeration {
+  photoGuidelines: {
+    maxSize: number;
+    allowedTypes: string[];
+    moderationRules: string[];
+  };
+  textGuidelines: {
+    forbiddenWords: string[];
+    maxLength: number;
+    requiresApproval: boolean;
+  };
+}
+```
+
+## 7. Performance Requirements
+
+### Image Optimization
+- Lazy loading for all images
+- Progressive loading for large images
+- WebP format with fallbacks
+- Multiple resolution variants
+- Blur placeholder loading
+
+### Caching Strategy
+```typescript
+interface CacheConfig {
+  providers: {
+    ttl: number;
+    maxItems: number;
+  };
+  locations: {
+    ttl: number;
+    maxItems: number;
+  };
+  images: {
+    ttl: number;
+    maxSize: number;
+  };
+}
+```
+
+## 8. Error Handling
+
+### Error States
+```typescript
+interface ErrorState {
+  type: 'network' | 'validation' | 'notFound' | 'unauthorized' | 'contentModeration';
+  message: string;
+  action?: {
+    label: string;
+    handler: () => void;
+  };
+  severity: 'error' | 'warning' | 'info';
+}
+```
+
+### Error Recovery
+- Automatic retry for network errors
+- Graceful degradation for missing images
+- Clear error messages with recovery actions
+- Offline support for basic navigation
+
+## 9. Analytics & Tracking
+
+### User Events
+```typescript
+interface UserEvent {
+  category: 'navigation' | 'search' | 'filter' | 'profile' | 'contact';
+  action: string;
+  label?: string;
+  value?: number;
+  metadata: {
+    location: string;
+    timestamp: Date;
+    sessionId: string;
+  };
+}
+```
+
+### Performance Metrics
+```typescript
+interface PerformanceMetrics {
+  pageLoad: {
+    ttfb: number;
+    fcp: number;
+    lcp: number;
+  };
+  interaction: {
+    fid: number;
+    tti: number;
+    cls: number;
+  };
+  custom: {
+    imageLoadTime: number;
+    searchLatency: number;
+    filterResponseTime: number;
+  };
+}
+```
+
+## 10. Testing Requirements
+
+### Component Testing
+- Unit tests for all components
+- Integration tests for user flows
+- E2E tests for critical paths
+- Visual regression tests for UI components
+
+### Performance Testing
+- Lighthouse scores > 90
+- First contentful paint < 1.5s
+- Time to interactive < 3.5s
+- Bundle size monitoring
+- Image optimization verification
+
+### Security Testing
+- Regular penetration testing
+- Content moderation testing
+- API endpoint security validation
+- Data encryption verification
+
+## 11. Accessibility Requirements
+
+### WCAG Compliance
+- WCAG 2.1 Level AA compliance
+- Keyboard navigation support
+- Screen reader compatibility
+- Color contrast requirements
+- Focus management
+
+### Mobile Accessibility
+- Touch target sizing
+- Gesture alternatives
+- Responsive font sizing
+- Orientation support
+
+## 12. Deployment & CI/CD
+
+### Build Process
+```typescript
+interface BuildConfig {
+  environment: 'development' | 'staging' | 'production';
+  optimization: {
+    minify: boolean;
+    splitChunks: boolean;
+    treeshaking: boolean;
+  };
+  monitoring: {
+    errors: boolean;
+    performance: boolean;
+    analytics: boolean;
+  };
+}
+```
+
+### Deployment Checklist
+- Security headers configuration
+- SSL/TLS setup
+- CDN configuration
+- Database migrations
+- Cache warming
+- Monitoring setup
+
 By following these guidelines, you will create a seamless, engaging, and visually stunning user experience that maintains the neon theme while ensuring optimal usability and accessibility. Remember to continuously monitor and iterate based on user feedback and analytics data.

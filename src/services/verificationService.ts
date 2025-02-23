@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import * as faceapi from '@vladmandic/face-api';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { Buffer } from 'buffer';
 
 // Add model loading state tracking

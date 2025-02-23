@@ -4,26 +4,39 @@ import type { Database } from '@/integrations/supabase/types';
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
-export type Profile = {
+export type UserRole = 'user' | 'provider' | 'admin';
+export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+export type BodyType = 'petite' | 'athletic' | 'curvy' | 'busty' | 'bbw';
+export type Ethnicity = 'asian' | 'black' | 'caucasian' | 'hispanic' | 'indian' | 'middle-eastern' | 'mixed' | 'other';
+
+export interface Profile {
   id: string;
+  username: string | null;
+  full_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  city: string | null;
+  state: string | null;
+  website: string | null;
+  role: UserRole;
+  verification_status: VerificationStatus;
+  
+  // Category-related fields
+  is_vip: boolean;
+  is_xxx_star: boolean;
+  is_visiting: boolean;
+  is_available: boolean;
+  body_type: BodyType | null;
+  has_video: boolean;
+  ethnicity: Ethnicity | null;
+  age: number | null;
+  provider_rating: number | null;
+  
+  // Timestamps
   created_at: string;
   updated_at: string;
-  full_name: string;
-  birthdate: string;
-  email: string;
-  avatar_url: string;
-  role: "user" | "provider" | "admin";
-  verification_status: "pending" | "approved" | "rejected" | "expired";
-  bio: string;
-  city: string;
-  contact_info: Json;
-  age?: number;
-  availability?: string;
-  body_type?: string;
-  ethnicity?: string;
-  username?: string;
-  website?: string;
-};
+}
 
 type DbProfile = Database['public']['Tables']['profiles']['Row'];
 type DbProfileUpdate = Database['public']['Tables']['profiles']['Update'];
